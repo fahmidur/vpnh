@@ -1,0 +1,109 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'logger'
+
+def die_with_usage(msg)
+  puts "Usage: vpn-helper [install, start, stop]"
+  puts "\n#{msg}" if msg
+  exit 1
+end
+
+def ami_root?
+  Process.euid == 0
+end
+
+def process_exists?(pid)
+  !!Process.kill(0, pid) rescue false
+end
+
+$logger = Logger.new(STDOUT)
+$instpath = File.join("/", "var", "opt", "vpn-helper");
+FileUtils.mkdir_p($instpath)
+
+unless ami_root?
+  die_with_usage("only root can run vpn-helper")
+end
+
+class VpnHelperDaemon
+  def initialize
+    @pid_path = File.join($instpath, 'lock.pid')
+    @mainloop_go = true
+  end
+
+  def ignition
+    if File.exists?(@pid_path) && 
+      (existing_pid = IO.read(@pid_path).strip.to_i) &&
+      process_exists?(existing_pid)
+      raise "Another VpnHelperDaemon is already running at PID=#{existing_pid}"
+    end
+    IO.write(@pid_path, "#{Process.pid}\n")
+    trap("TERM") do
+      puts "\n--- Heard SIGTERM ---"
+      shutdown
+    end
+    trap("INT") do
+      puts "\n--- Heard SIGINT ---"
+      shutdown
+    end
+    mainloop
+  end
+
+  def shutdown
+    @mainloop_go = false
+    pid = File.exists?(@pid_path) ? IO.read(@pid_path).strip.to_i : nil
+    return unless pid
+    return Process.kill(15, pid) unless pid == Process.pid
+    FileUtils.rm_f(@pid_path)
+  end
+
+  private
+  
+  def mainloop
+    while(@mainloop_go)
+      $logger.info "."
+      sleep 2
+    end
+    shutdown
+  end
+end
+
+def daemon_ignition
+  vpnd = VpnHelperDaemon.new
+  vpnd.ignition
+end
+
+def daemon_shutdown
+  vpnd = VpnHelperDaemon.new
+  vpnd.shutdown
+end
+
+def daemon_start
+  raise 'fork failed' if (pid=fork) == -1
+  exit if pid != nil # exit the parent process
+  Process.setsid # child becomes new session and group leader
+  raise 'second fork failed' if (pid=fork) == -1
+  exit if pid != nil
+  daemon_pid = pid
+  Dir.chdir '/'
+  File.umask 0000
+  STDIN.reopen '/dev/null'
+  STDOUT.reopen '/dev/null'
+  STDERR.reopen '/dev/null'
+  daemon_ignition
+end
+
+
+command = ARGV[0]
+unless command
+  die_with_usage
+end
+
+case command
+when "start"
+  daemon_start
+when "stop"
+  daemon_shutdown
+when "daemon"
+  daemon_ignition
+end
