@@ -4,9 +4,13 @@ vpn-helper is a wrapper/daemon around openvpn.
 
 ## Commands
 
-*  vpn-helper install [config.json]
+*  vpn-helper install
 
 install the vpn-helper systemctl service if it is not already installed.
+
+* vpn-helper config config.json
+
+configure the vpn-helper according to config.json
 
 
 * vpn-helper status

@@ -93,7 +93,6 @@ def daemon_start
   daemon_ignition
 end
 
-
 command = ARGV[0]
 unless command
   die_with_usage
