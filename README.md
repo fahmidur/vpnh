@@ -12,7 +12,6 @@ install the vpn-helper systemctl service if it is not already installed.
 
 configure the vpn-helper according to config.json
 
-
 * vpn-helper status
 
 output status of vpn-helper. 
