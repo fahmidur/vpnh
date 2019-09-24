@@ -1,3 +1,14 @@
-#!/usr/bin/env sh
+#!/usr/bin/env ruby
 
-exec ./vpnh ovpnup $*
+unless ARGV.size === 6
+  die_with_usage('expecting 6 arguments from openvpn')
+end
+vpni_name = ARGV[0]
+vpni_addr = ARGV[3]
+vpni_mask = ARGV[4]
+vpni_dot1 = vpni_addr.gsub(/\.\d+$/, '.1')
+puts "vpni_name=#{vpni_name}"
+puts "vpni_addr=#{vpni_addr}"
+puts "vpni_mask=#{vpni_mask}"
+puts "vpni_dot1=#{vpni_dot1}"
+
