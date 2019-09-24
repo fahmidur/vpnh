@@ -56,6 +56,7 @@ end
 class VpnhServer
   def initialize
     @mainloop_go = true
+    @t1 = nil
   end
 
   def ignition
@@ -83,17 +84,24 @@ class VpnhServer
     DRb.stop_service
   end
 
+  def status
+    {
+      :t1 => @t1
+    }
+  end
+
   private
   
   def mainloop
     FileUtils.rm_f($ipc_path) if File.exists?($ipc_path)
     DRb.start_service("drbunix://#{$ipc_path}", self)
-    @t1 = Thread.new do 
+    @t1 = Thread.new {
       while(@mainloop_go)
         $logger.info "."
         sleep 2
       end
-    end
+    }
+    sleep 0.1 while @t1.status != 'sleep'
     begin
     DRb.thread.join
     rescue
@@ -155,7 +163,7 @@ elsif command == 'server daemon'
 elsif command == 'server shutdown' || command == 'server stop' || command == 'stop'
   vpnc.shutdown
 elsif command == 'status'
-  puts "TODO"
+  puts vpnc.status
 else
   die_with_usage
 end
