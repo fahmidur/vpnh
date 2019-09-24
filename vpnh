@@ -205,6 +205,22 @@ elsif command =~ /config set file\b(.+)/
   end
   file_data = JSON.parse(IO.read(file_path))
   pp file_data
+  config_real_iface = file_data['real_iface']
+  if config_real_iface == '_X_DEFAULT'
+    config_real_iface = Util.get_default_iface
+  end
+  errors = []
+  unless config_real_iface
+    errors.push('expecting config.real_iface')
+  end
+  if errors.size > 0
+    puts "config file has errors:"
+    errors.each do |err|
+      puts "* #{err}"
+    end
+    puts
+    exit 1
+  end
 elsif command =~ /^ovpnup(.*)$/
   args = $1.strip.split(/\s+/)
   puts "args=#{args}"
