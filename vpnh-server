@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require 'drb'
+
+
+$instpath = File.join("/", "var", "opt", "vpn-helper");
+$sockipcx = "#{$instpath}/ipc.sock"
+
+class VpnServer
+  def time
+    return Time.now
+  end
+end
+
+FRONT_OBJECT=VpnServer.new
+DRb.start_service("drbunix://#{$sockipcx}")
+DRb.thread.join
+

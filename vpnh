@@ -25,7 +25,7 @@ unless ami_root?
   die_with_usage("only root can run vpn-helper")
 end
 
-class VpnHelperDaemon
+class VpnhServer
   def initialize
     @pid_path = File.join($instpath, 'lock.pid')
     @mainloop_go = true
@@ -35,7 +35,7 @@ class VpnHelperDaemon
     if File.exists?(@pid_path) && 
       (existing_pid = IO.read(@pid_path).strip.to_i) &&
       process_exists?(existing_pid)
-      raise "Another VpnHelperDaemon is already running at PID=#{existing_pid}"
+      raise "Another VpnhServer is already running at PID=#{existing_pid}"
     end
     IO.write(@pid_path, "#{Process.pid}\n")
     trap("TERM") do
@@ -69,12 +69,12 @@ class VpnHelperDaemon
 end
 
 def daemon_ignition
-  vpnd = VpnHelperDaemon.new
+  vpnd = VpnhServer.new
   vpnd.ignition
 end
 
 def daemon_shutdown
-  vpnd = VpnHelperDaemon.new
+  vpnd = VpnhServer.new
   vpnd.shutdown
 end
 
@@ -93,16 +93,11 @@ def daemon_start
   daemon_ignition
 end
 
-command = ARGV[0]
-unless command
+command = ARGV.join(" ").chomp
+unless command && command.size > 0 
   die_with_usage
 end
 
-case command
-when "start"
-  daemon_start
-when "stop"
-  daemon_shutdown
-when "daemon"
-  daemon_ignition
+if command === 'server'
+
 end
