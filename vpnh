@@ -154,7 +154,6 @@ elsif command == 'server daemon'
   end
 elsif command == 'server shutdown' || command == 'server stop' || command == 'stop'
   vpnc.shutdown
-  #vpnd.shutdown
 elsif command == 'status'
   puts "TODO"
 else
