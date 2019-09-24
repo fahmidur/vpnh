@@ -101,7 +101,6 @@ class VpnhServer
         sleep 2
       end
     }
-    sleep 0.1 while @t1.status != 'sleep'
     begin
     DRb.thread.join
     rescue
