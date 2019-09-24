@@ -11,6 +11,7 @@ $logger = Logger.new(STDOUT)
 $the_path = File.join('/', 'var', 'opt', 'vpnh');
 $pid_path = File.join($the_path, 'lock.pid');
 $ipc_path = File.join($the_path, 'ipc.sock');
+$con_path = File.join($the_path, 'config.json');
 
 #--- Helpers
 def die_with_usage(msg=nil, ecode=1)
@@ -54,6 +55,59 @@ module Util
 
 end
 
+class VpnhConfig
+
+  def initialize(file_path)
+    @file_path = file_path
+    unless @file_path
+      raise 'expecting file_path'
+    end
+    @data = {}
+    @data_read = {}
+    sync
+  end
+
+  def sync
+    read
+    fix
+    write if changed?
+  end
+
+  
+  def read
+    return unless File.exists?(@file_path)
+    gdata = {}
+    odata = JSON.parse(IO.read(@file_path))
+    odata.each do |k, v|
+      return if k[0] == '_'
+      gdata[k] = v
+    end
+    @data_read = gdata.clone
+    @data = gdata.clone
+  end
+
+  def fix
+    unless @data['real_iface']
+      @data['real_iface'] = Util.get_default_iface
+    end
+  end
+
+  def write
+    dirname = File.dirname(@file_path)
+    FileUtils.mkdir_p(dirname)
+    data = @data.clone
+    data['_write_ts'] = Time.now.to_i
+    json_str = JSON.pretty_generate(data)
+    IO.write(@file_path, json_str+"\n")
+    read
+  end
+
+  def changed?
+    !File.exists?(@file_path) || @data_read != @data
+  end
+
+end
+
 module Shared
   def self.running_server_pid
     return nil unless File.exists?($pid_path)
@@ -66,8 +120,10 @@ module Shared
 end
 
 class VpnhServer
+
   def initialize
     @mainloop_go = true
+    @vcon = VpnhConfig.new($con_path)
     @t1 = nil
   end
 
@@ -194,7 +250,9 @@ elsif command == 'server daemon'
   end
 elsif command == 'server shutdown' || command == 'server stop' || command == 'stop'
   # tell the vpnhserver (if it is running) to shutdown
+  puts 'stopping vpnh server...'
   vpnc.shutdown
+  puts 'stopping vpnh server... DONE'
 elsif command == 'status'
   puts JSON.pretty_generate(vpnc.status)
 elsif command =~ /config set file\b(.+)/
