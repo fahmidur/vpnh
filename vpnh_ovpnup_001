@@ -11,7 +11,7 @@ def user_exists?(name)
 end
 
 def make_vpnuser
-  if user_exists($vpnuser)
+  if user_exists?($vpnuser)
     puts "SKIPPED make_vpnuser. user already exists"
     return
   end
@@ -41,10 +41,10 @@ def add_routing_table
   end
 end
 
-def add_ip_routes_and_rules(vpni_name, vpni_addr, vpni_dot1)
+def add_ip_routes_and_rules(vpni_name, vpni_addr)
   vpni_dot0 = vpni_addr.gsub(/\.\d+$/, '.0')
   vpni_dot1 = vpni_addr.gsub(/\.\d+$/, '.1')
-  puts "vpni_dot0=#{vpni_dot1}"
+  puts "vpni_dot0=#{vpni_dot0}"
   puts "vpni_dot1=#{vpni_dot1}"
 
   `ip route add #{vpni_dot0}/24 dev #{vpni_name} src #{vpni_addr} table #{$vpntable}`
@@ -52,8 +52,8 @@ def add_ip_routes_and_rules(vpni_name, vpni_addr, vpni_dot1)
 
   # now for the rules
 
-  `ip rule add from #{vpni_name}/32 table #{$vpntable}`
-  `ip rule add to #{vpni_name}/32 table #{$vpntable}`
+  `ip rule add from #{vpni_addr}/32 table #{$vpntable}`
+  `ip rule add to #{vpni_addr}/32 table #{$vpntable}`
 end
 
 #--- MAIN
@@ -74,4 +74,4 @@ puts "vpni_mask=#{vpni_mask}"
 make_vpnuser
 add_routing_table
 
-add_ip_routes_and_rules(vpni_name, vpni_addr, vpni_dot1)
+add_ip_routes_and_rules(vpni_name, vpni_addr)
