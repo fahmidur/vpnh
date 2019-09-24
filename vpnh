@@ -80,27 +80,52 @@ class VpnhServer
     return unless pid
     return Process.kill(15, pid) unless pid == Process.pid
     FileUtils.rm_f($pid_path)
+    DRb.stop_service
   end
 
   private
   
   def mainloop
-    while(@mainloop_go)
-      $logger.info "."
-      sleep 2
+    FileUtils.rm_f($ipc_path) if File.exists?($ipc_path)
+    DRb.start_service("drbunix://#{$ipc_path}", self)
+    @t1 = Thread.new do 
+      while(@mainloop_go)
+        $logger.info "."
+        sleep 2
+      end
+    end
+    begin
+    DRb.thread.join
+    rescue
+    ensure
+      DRb.stop_service
     end
     shutdown
   end
 end
 
-def server_ignition
-  vpnd = VpnhServer.new
-  vpnd.ignition
-end
+class VpnhClient
+  def initialize
+    @server = nil
+  end
 
-def server_shutdown
-  vpnd = VpnhServer.new
-  vpnd.shutdown
+  def method_missing(meth, *args, &block)
+    connect
+    if @server && @server.respond_to?(meth)
+      @server.public_send(meth, *args, &block)
+    end
+  end
+
+  private
+
+  def connect
+    return if @server
+    return if @connection_attempted
+    if running_server_pid && File.exists?($ipc_path)
+      @server = DRbObject.new_with_uri("drbunix://#{$ipc_path}")
+    end
+    @connection_attempted = true
+  end
 end
 
 #--- MAIN
@@ -116,14 +141,20 @@ end
 
 if command == 'help' || command == 'h'
   die_with_usage(nil, 0)
-elsif command == 'server'
-  server_ignition
+end
+
+vpnd = VpnhServer.new
+vpnc = VpnhClient.new
+
+if command == 'server'
+  vpnd.ignition
 elsif command == 'server daemon'
   daemonize do
-    server_ignition
+    vpnd.ignition
   end
-elsif command == 'server shutdown' || command == 'server stop'
-  server_shutdown
+elsif command == 'server shutdown' || command == 'server stop' || command == 'stop'
+  vpnc.shutdown
+  #vpnd.shutdown
 elsif command == 'status'
   puts "TODO"
 else
