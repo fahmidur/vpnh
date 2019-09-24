@@ -130,7 +130,3 @@ else
   die_with_usage
 end
 
-# vpnh server
-# vpnh daemon -- run the server as a daemon
-# vpnh script -- openvpn up script
-
