@@ -26,7 +26,7 @@ def add_routing_table
     fields = line.split(/\s+/)
     priority = fields[0]
     name = fields[1]
-    tables.push(name)
+    tables << name
     puts "found table. name=#{name} priority=#{priority}"
   end
   f.close
