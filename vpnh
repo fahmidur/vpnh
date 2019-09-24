@@ -12,7 +12,7 @@ $ipc_path = File.join($the_path, 'ipc.sock');
 
 #--- Helpers
 def die_with_usage(msg=nil, ecode=1)
-  puts "Usage: vpn-helper [command]"
+  puts "Usage: vpnh [command]"
   puts "\n#{msg}" if msg
   exit ecode
 end
@@ -173,9 +173,8 @@ elsif command == 'server shutdown' || command == 'server stop' || command == 'st
 elsif command == 'status'
   puts vpnc.status
 elsif command =~ /^ovpnup(.*)$/
-  args_local = $1.strip.split(' ')
+  args_local = $1.strip.split(/\s+/)
   puts "args_local=#{args_local}"
-  puts "TODO"
 elsif command =~ /x (\w+)/
   vpnc.public_send($1)
 else
