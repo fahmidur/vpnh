@@ -86,8 +86,14 @@ class VpnhServer
 
   def status
     {
-      :t1 => @t1
+      :ok => true
     }
+  end
+
+  def t1_kill
+    return unless @t1
+    $logger.info "killing t1..."
+    Thread.kill(@t1)
   end
 
   private
@@ -111,6 +117,9 @@ class VpnhServer
   end
 end
 
+# mainly delegates to the VpnhServer object
+# via DRb. Ensures that the VpnhServer remote
+# object is connected.
 class VpnhClient
   def initialize
     @server = nil
@@ -163,6 +172,12 @@ elsif command == 'server shutdown' || command == 'server stop' || command == 'st
   vpnc.shutdown
 elsif command == 'status'
   puts vpnc.status
+elsif command =~ /^ovpnup(.*)$/
+  args_local = $1.strip.split(' ')
+  puts "args_local=#{args_local}"
+  puts "TODO"
+elsif command =~ /x (\w+)/
+  vpnc.public_send($1)
 else
   die_with_usage
 end
