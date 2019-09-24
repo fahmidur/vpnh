@@ -2,18 +2,20 @@
 
 require 'set'
 
+$vpnuser = 'vpnuser'
+$vpntable = 'vpntable'
+
 def user_exists?(name)
   users = Set.new(IO.read('/etc/passwd').split("\n").map {|e| e.split(':')[0] })
   users.member?(name)
 end
 
 def make_vpnuser
-  name = 'vpnuser'
-  if user_exists?(name)
+  if user_exists($vpnuser)
     puts "SKIPPED make_vpnuser. user already exists"
     return
   end
-  `useradd -m #{name}`
+  `useradd -m #{$vpnuser}`
 end
 
 def add_routing_table
@@ -30,28 +32,46 @@ def add_routing_table
     puts "found table. name=#{name} priority=#{priority}"
   end
   f.close
-  if tables.member?('vpntable')
-    puts 'vpntable already exists'
+  if tables.member?($vpntable)
+    puts 'SKIPPED. vpntable already exists'
     return 
   end
   open(path, 'a') do |f|
-    f.puts "1\tvpntable"
+    f.puts "1\${$vpntable}"
   end
 end
+
+def add_ip_routes_and_rules(vpni_name, vpni_addr, vpni_dot1)
+  vpni_dot0 = vpni_addr.gsub(/\.\d+$/, '.0')
+  vpni_dot1 = vpni_addr.gsub(/\.\d+$/, '.1')
+  puts "vpni_dot0=#{vpni_dot1}"
+  puts "vpni_dot1=#{vpni_dot1}"
+
+  `ip route add #{vpni_dot0}/24 dev #{vpni_name} src #{vpni_addr} table #{$vpntable}`
+  `ip route add default via #{vpni_dot1} dev #{vpni_name} table #{$vpntable}`
+
+  # now for the rules
+
+  `ip rule add from #{vpni_name}/32 table #{$vpntable}`
+  `ip rule add to #{vpni_name}/32 table #{$vpntable}`
+end
+
+#--- MAIN
 
 unless ARGV.size === 6
   puts 'expecting 6 arguments from openvpn'
   exit 1
 end
+
 vpni_name = ARGV[0]
 vpni_addr = ARGV[3]
 vpni_mask = ARGV[4]
-vpni_dot1 = vpni_addr.gsub(/\.\d+$/, '.1')
 
 puts "vpni_name=#{vpni_name}"
 puts "vpni_addr=#{vpni_addr}"
 puts "vpni_mask=#{vpni_mask}"
-puts "vpni_dot1=#{vpni_dot1}"
 
 make_vpnuser
 add_routing_table
+
+add_ip_routes_and_rules(vpni_name, vpni_addr, vpni_dot1)
