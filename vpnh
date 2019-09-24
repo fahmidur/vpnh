@@ -2,11 +2,19 @@
 
 require 'fileutils'
 require 'logger'
+require 'drb'
 
-def die_with_usage(msg)
-  puts "Usage: vpn-helper [install, start, stop]"
+#--- Globals
+$logger = Logger.new(STDOUT)
+$the_path = File.join('/', 'var', 'opt', 'vpnh');
+$pid_path = File.join($the_path, 'lock.pid');
+$ipc_path = File.join($the_path, 'ipc.sock');
+
+#--- Helpers
+def die_with_usage(msg=nil, ecode=1)
+  puts "Usage: vpn-helper [command]"
   puts "\n#{msg}" if msg
-  exit 1
+  exit ecode
 end
 
 def ami_root?
@@ -17,27 +25,44 @@ def process_exists?(pid)
   !!Process.kill(0, pid) rescue false
 end
 
-$logger = Logger.new(STDOUT)
-$instpath = File.join("/", "var", "opt", "vpn-helper");
-FileUtils.mkdir_p($instpath)
-
-unless ami_root?
-  die_with_usage("only root can run vpn-helper")
+def make_paths
 end
+
+def running_server_pid
+  return nil unless File.exists?($pid_path)
+  existing_pid = IO.read($pid_path).strip.to_i
+  if existing_pid && process_exists?(existing_pid)
+    return existing_pid
+  end
+  return nil
+end
+
+def daemonize
+  raise 'fork failed' if (pid=fork) == -1
+  exit if pid != nil # exit the parent process
+  Process.setsid # child becomes new session and group leader
+  raise 'second fork failed' if (pid=fork) == -1
+  exit if pid != nil
+  daemon_pid = pid
+  Dir.chdir '/'
+  File.umask 0000
+  STDIN.reopen '/dev/null'
+  STDOUT.reopen '/dev/null'
+  STDERR.reopen '/dev/null'
+  yield
+end
+
 
 class VpnhServer
   def initialize
-    @pid_path = File.join($instpath, 'lock.pid')
     @mainloop_go = true
   end
 
   def ignition
-    if File.exists?(@pid_path) && 
-      (existing_pid = IO.read(@pid_path).strip.to_i) &&
-      process_exists?(existing_pid)
+    if (existing_pid=running_server_pid)
       raise "Another VpnhServer is already running at PID=#{existing_pid}"
     end
-    IO.write(@pid_path, "#{Process.pid}\n")
+    IO.write($pid_path, "#{Process.pid}\n")
     trap("TERM") do
       puts "\n--- Heard SIGTERM ---"
       shutdown
@@ -51,10 +76,10 @@ class VpnhServer
 
   def shutdown
     @mainloop_go = false
-    pid = File.exists?(@pid_path) ? IO.read(@pid_path).strip.to_i : nil
+    pid = File.exists?($pid_path) ? IO.read($pid_path).strip.to_i : nil
     return unless pid
     return Process.kill(15, pid) unless pid == Process.pid
-    FileUtils.rm_f(@pid_path)
+    FileUtils.rm_f($pid_path)
   end
 
   private
@@ -68,36 +93,44 @@ class VpnhServer
   end
 end
 
-def daemon_ignition
+def server_ignition
   vpnd = VpnhServer.new
   vpnd.ignition
 end
 
-def daemon_shutdown
+def server_shutdown
   vpnd = VpnhServer.new
   vpnd.shutdown
 end
 
-def daemon_start
-  raise 'fork failed' if (pid=fork) == -1
-  exit if pid != nil # exit the parent process
-  Process.setsid # child becomes new session and group leader
-  raise 'second fork failed' if (pid=fork) == -1
-  exit if pid != nil
-  daemon_pid = pid
-  Dir.chdir '/'
-  File.umask 0000
-  STDIN.reopen '/dev/null'
-  STDOUT.reopen '/dev/null'
-  STDERR.reopen '/dev/null'
-  daemon_ignition
+#--- MAIN
+unless ami_root?
+  die_with_usage("only root can run vpnh")
 end
+FileUtils.mkdir_p($the_path)
 
 command = ARGV.join(" ").chomp
 unless command && command.size > 0 
   die_with_usage
 end
 
-if command === 'server'
-
+if command == 'help' || command == 'h'
+  die_with_usage(nil, 0)
+elsif command == 'server'
+  server_ignition
+elsif command == 'server daemon'
+  daemonize do
+    server_ignition
+  end
+elsif command == 'server shutdown' || command == 'server stop'
+  server_shutdown
+elsif command == 'status'
+  puts "TODO"
+else
+  die_with_usage
 end
+
+# vpnh server
+# vpnh daemon -- run the server as a daemon
+# vpnh script -- openvpn up script
+
