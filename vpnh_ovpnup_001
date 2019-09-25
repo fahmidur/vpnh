@@ -51,7 +51,22 @@ def add_ip_routes_and_rules(vpni_name, vpni_addr)
   `ip route add default via #{vpni_dot1} dev #{vpni_name} table #{$vpntable}`
 
   # now for the rules
-
+  rules_to_del = []
+  `ip rule show`.split("\n").each do |line|
+    line.chomp!
+    puts "ip rule show: #{line}"
+    if line =~ /^(\d+):\s+(.+)$/
+      priority = $1
+      rule = $2
+      if rule =~ /\b#{$vpntable}\b/
+        rules_to_del << rule
+      end
+    end
+  end
+  rules_to_del.each do |rule|
+    puts "rule_to_del. rule = |#{rule}|"
+    `ip rule del #{rule}`
+  end
   `ip rule add from #{vpni_addr}/32 table #{$vpntable}`
   `ip rule add to #{vpni_addr}/32 table #{$vpntable}`
 end
