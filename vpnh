@@ -72,7 +72,6 @@ class VpnhConfig
     fix
     write if changed?
   end
-
   
   def read
     return unless File.exists?(@file_path)
@@ -239,17 +238,17 @@ if command == 'help' || command == 'h'
   die_with_usage(nil, 0)
 end
 
-vpnd = VpnhServer.new
 vpnc = VpnhClient.new
 
 if command == 'server'
+  vpnd = VpnhServer.new
   vpnd.ignition
 elsif command == 'server daemon'
   Util.daemonize do
+    vpnd = VpnhServer.new
     vpnd.ignition
   end
 elsif command == 'server shutdown' || command == 'server stop' || command == 'stop'
-  # tell the vpnhserver (if it is running) to shutdown
   puts 'stopping vpnh server...'
   vpnc.shutdown
   puts 'stopping vpnh server... DONE'
@@ -294,7 +293,6 @@ elsif command =~ /^ovpnup(.*)$/
 elsif command == 'get_default_iface'
   puts Util.get_default_iface
 elsif command =~ /x (\w+)/
-  # for testing and debugging
   out = vpnc.public_send($1)
   puts out if out
 else

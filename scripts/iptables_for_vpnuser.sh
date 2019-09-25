@@ -10,7 +10,7 @@ iptables -F -t mangle
 iptables -F -t filter
 
 # mark packets from $VPNUSER
-iptables -t mangle -A OUTPUT ! --dest $LANIP  -m owner --uid-owner $VPNUSER -j MARK --set-mark 0x1
+iptables -t mangle -A OUTPUT ! --dest $LANIP -m owner --uid-owner $VPNUSER -j MARK --set-mark 0x1
 iptables -t mangle -A OUTPUT --dest $LANIP -p udp --dport 53 -m owner --uid-owner $VPNUSER -j MARK --set-mark 0x1
 iptables -t mangle -A OUTPUT --dest $LANIP -p tcp --dport 53 -m owner --uid-owner $VPNUSER -j MARK --set-mark 0x1
 iptables -t mangle -A OUTPUT ! --src $LANIP -j MARK --set-mark 0x1
