@@ -55,58 +55,6 @@ module Util
 
 end
 
-class VpnhConfig
-
-  def initialize(file_path)
-    @file_path = file_path
-    unless @file_path
-      raise 'expecting file_path'
-    end
-    @data = {}
-    @data_read = {}
-    sync
-  end
-
-  def sync
-    read
-    fix
-    write if changed?
-  end
-  
-  def read
-    return unless File.exists?(@file_path)
-    gdata = {}
-    odata = JSON.parse(IO.read(@file_path))
-    odata.each do |k, v|
-      return if k[0] == '_'
-      gdata[k] = v
-    end
-    @data_read = gdata.clone
-    @data = gdata.clone
-  end
-
-  def fix
-    unless @data['real_iface']
-      @data['real_iface'] = Util.get_default_iface
-    end
-  end
-
-  def write
-    dirname = File.dirname(@file_path)
-    FileUtils.mkdir_p(dirname)
-    data = @data.clone
-    data['_write_ts'] = Time.now.to_i
-    json_str = JSON.pretty_generate(data)
-    IO.write(@file_path, json_str+"\n")
-    read
-  end
-
-  def changed?
-    !File.exists?(@file_path) || @data_read != @data
-  end
-
-end
-
 module Shared
   def self.running_server_pid
     return nil unless File.exists?($pid_path)
@@ -118,11 +66,93 @@ module Shared
   end
 end
 
+class ConfigFile
+
+  def initialize(file_path)
+    @file_path = file_path
+    unless @file_path
+      raise 'expecting file_path'
+    end
+    @data_read = {}
+    @data = {}
+    data_read
+    data_write if changed?
+  end
+
+  def get(key)
+    @data[key.to_s]
+  end
+
+  def set(key, val)
+    @data[key.to_s] = val
+    data_write if changed?
+  end
+
+  def data_read
+    return unless File.exists?(@file_path)
+    gdata = {}
+    odata = JSON.parse(IO.read(@file_path))
+    odata.each do |k, v|
+      next if k[0] == '_'
+      gdata[k] = v
+    end
+    @data_read = gdata.clone
+    @data = gdata.clone
+  end
+
+  def data_write
+    $logger.info "VpnhConfig. data_write ..."
+    dirname = File.dirname(@file_path)
+    FileUtils.mkdir_p(dirname)
+    data = @data.clone
+    data['_write_ts'] = Time.now.to_i
+    json_str = JSON.pretty_generate(data)
+    IO.write(@file_path, json_str+"\n")
+    data_read
+  end
+
+  def changed?
+    @data_read != @data || !File.exists?(@file_path)
+  end
+
+end
+
+class VpnhConfig
+  def initialize(conthing)
+    case conthing
+    when String
+      @config = ConfigFile.new(conthing)
+    when ConfigFile
+      @config = conthing
+    else
+      raise 'invalid conthing'
+    end
+  end
+
+  def real_iface=(val)
+    if val == nil
+      @config.set(Util.get_default_iface)
+      return
+    end
+    # TODO ensure that val is a valid iface
+    @config.set(val)
+  end
+
+end
+
+class VpnhMaster
+  def initialize
+  end
+
+  def vpnc
+    @vpnc ||= VpnhClient.new
+  end
+end
+
 class VpnhServer
 
   def initialize
     @mainloop_go = true
-    @vcon = VpnhConfig.new($con_path)
     @t1 = nil
   end
 
@@ -254,30 +284,6 @@ elsif command == 'server shutdown' || command == 'server stop' || command == 'st
   puts 'stopping vpnh server... DONE'
 elsif command == 'status'
   puts JSON.pretty_generate(vpnc.status)
-elsif command =~ /config set file\b(.+)/
-  file_path = $1.strip
-  unless File.exists?(file_path)
-    puts "expecting file at #{file_path}"
-    exit 1
-  end
-  file_data = JSON.parse(IO.read(file_path))
-  pp file_data
-  config_real_iface = file_data['real_iface']
-  if config_real_iface == '_X_DEFAULT'
-    config_real_iface = Util.get_default_iface
-  end
-  errors = []
-  unless config_real_iface
-    errors.push('expecting config.real_iface')
-  end
-  if errors.size > 0
-    puts "config file has errors:"
-    errors.each do |err|
-      puts "* #{err}"
-    end
-    puts
-    exit 1
-  end
 elsif command =~ /^ovpnup(.*)$/
   args = $1.strip.split(/\s+/)
   puts "args=#{args}"
