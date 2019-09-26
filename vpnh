@@ -2,59 +2,26 @@
 
 require 'fileutils'
 require 'logger'
-require 'drb'
 require 'json'
 require 'pp'
+require 'pry'
 
-#--- Globals
+require_relative 'Util.rb'
+
+#--- BEG. Globals
 $logger = Logger.new(STDOUT)
 $the_path = File.join('/', 'var', 'opt', 'vpnh');
 $pid_path = File.join($the_path, 'lock.pid');
 $ipc_path = File.join($the_path, 'ipc.sock');
 $con_path = File.join($the_path, 'config.json');
+#--- END. Globals
 
-#--- Helpers
+#--- BEG. Helpers
 def die_with_usage(msg=nil, ecode=1)
   puts "Usage: vpnh [command]"
   puts "\n#{msg}" if msg
   exit ecode
 end
-
-module Util
-
-  def self.ami_root?
-    Process.euid == 0
-  end
-
-  def self.get_default_iface
-    `netstat -r`.split("\n").each do |line|
-      next unless line =~ /^default\b/
-      return (line.split(/\s+/)[7].chomp)
-    end
-    return nil
-  end
-
-  def self.daemonize
-    raise 'fork failed' if (pid=fork) == -1
-    exit if pid != nil # exit the parent process
-    Process.setsid # child becomes new session and group leader
-    raise 'second fork failed' if (pid=fork) == -1
-    exit if pid != nil
-    daemon_pid = pid
-    Dir.chdir '/'
-    File.umask 0000
-    STDIN.reopen '/dev/null'
-    STDOUT.reopen '/dev/null'
-    STDERR.reopen '/dev/null'
-    yield
-  end
-  
-  def self.process_exists?(pid)
-    !!Process.kill(0, pid) rescue false
-  end
-
-end
-
 module Shared
   def self.running_server_pid
     return nil unless File.exists?($pid_path)
@@ -65,14 +32,13 @@ module Shared
     return nil
   end
 end
+#--- END. Helper
 
 class ConfigFile
 
   def initialize(file_path)
     @file_path = file_path
-    unless @file_path
-      raise 'expecting file_path'
-    end
+    raise 'expecting file_path' unless @file_path
     @data_read = {}
     @data = {}
     data_read
@@ -118,6 +84,7 @@ class ConfigFile
 end
 
 class VpnhConfig
+
   def initialize(conthing)
     case conthing
     when String
@@ -141,16 +108,41 @@ class VpnhConfig
 end
 
 class VpnhMaster
+  attr_reader :the_path
+
   def initialize
+    @the_path = File.join('/', 'var', 'opt', 'vpnh')
+    @config = VpnhConfig.new(con_path)
   end
 
-  def vpnc
-    @vpnc ||= VpnhClient.new
+  def config
+    @config
   end
+
+  def server
+    @server ||= VpnhClient.new
+  end
+
+  def client
+    @client ||= VpndServer.new
+  end
+
+  def pid_path
+    @pid_path ||= File.join(@the_path, 'lock.pid');
+  end
+
+  def ipc_path
+    @ipc_path ||= File.join(@the_path, 'ipc.sock');
+  end
+
+  def con_path
+    @con_path ||= File.join(@the_path, 'config.json');
+  end
+
 end
 
 class VpnhServer
-
+  require 'drb'
   def initialize
     @mainloop_go = true
     @t1 = nil
@@ -226,6 +218,8 @@ end
 # via DRb. Ensures that the VpnhServer remote
 # object is connected.
 class VpnhClient
+  require 'drb'
+
   def initialize
     @server = nil
   end
