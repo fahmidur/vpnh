@@ -5,6 +5,15 @@ module Util
     Process.euid == 0
   end
 
+  def self.get_all_users
+    Set.new(IO.read('/etc/passwd').split("\n").map {|e| e.split(':')[0] })
+  end
+
+  def self.user_exists?(name)
+    users = get_all_users
+    users.member?(name)
+  end
+
   def self.get_all_ifaces
     ifaces = Set.new
     `ip link show`.split("\n").each do |line|
