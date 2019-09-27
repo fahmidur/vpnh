@@ -1,7 +1,17 @@
 module Util
+  require 'set'
 
   def self.ami_root?
     Process.euid == 0
+  end
+
+  def self.get_all_ifaces
+    ifaces = Set.new
+    `ip link show`.split("\n").each do |line|
+      next unless line =~ /^\d+: ([a-zA-Z0-9_]+)/
+      ifaces << $1
+    end
+    return ifaces
   end
 
   def self.get_default_iface

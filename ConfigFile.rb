@@ -16,7 +16,11 @@ class ConfigFile
   end
 
   def set(key, val)
-    @data[key.to_s] = val
+    if val
+      @data.delete(key)
+    else
+      @data[key.to_s] = val
+    end
     data_write if changed?
   end
 

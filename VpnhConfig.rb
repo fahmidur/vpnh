@@ -13,12 +13,20 @@ class VpnhConfig
   end
 
   def real_iface=(val)
-    if val == nil
-      @config.set(Util.get_default_iface)
+    if val
+      all_ifaces = Util.get_all_ifaces
+      unless all_ifaces.member?(val)
+        puts "WARNING: #{val} is not a valid iface"
+      end
+      @config.set(val)
+    else
+      default_iface = Util.get_default_iface
+      unless default_iface
+        puts "WARNING: unable to determine default_iface"
+      end
+      @config.set(default_iface)
       return
     end
-    # TODO ensure that val is a valid iface
-    @config.set(val)
   end
 
 end

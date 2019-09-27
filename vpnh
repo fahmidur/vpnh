@@ -59,6 +59,8 @@ elsif command =~ /^ovpnup(.*)$/
   puts "vpni_mask=#{vpni_mask}"
 elsif command == 'get_default_iface'
   puts Util.get_default_iface
+elsif command == 'get_all_ifaces'
+  puts Util.get_all_ifaces.to_a.to_json
 elsif command =~ /x (\w+)/
   out = master.client.public_send($1)
   puts out if out
