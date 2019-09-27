@@ -61,6 +61,9 @@ elsif command == 'get_default_iface'
   puts Util.get_default_iface
 elsif command == 'get_all_ifaces'
   puts Util.get_all_ifaces.to_a.to_json
+elsif command =~ /config get (.+)/
+  key = $1.strip
+  puts master.config.get(key)
 elsif command =~ /x (\w+)/
   out = master.client.public_send($1)
   puts out if out
