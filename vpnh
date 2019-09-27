@@ -4,16 +4,12 @@ require 'fileutils'
 require 'logger'
 require 'json'
 require 'pp'
-require 'pry'
 
 require_relative 'Util.rb'
+require_relative 'ConfigFile.rb'
 
 #--- BEG. Globals
 $logger = Logger.new(STDOUT)
-$the_path = File.join('/', 'var', 'opt', 'vpnh');
-$pid_path = File.join($the_path, 'lock.pid');
-$ipc_path = File.join($the_path, 'ipc.sock');
-$con_path = File.join($the_path, 'config.json');
 #--- END. Globals
 
 #--- BEG. Helpers
@@ -22,66 +18,7 @@ def die_with_usage(msg=nil, ecode=1)
   puts "\n#{msg}" if msg
   exit ecode
 end
-module Shared
-  def self.running_server_pid
-    return nil unless File.exists?($pid_path)
-    existing_pid = IO.read($pid_path).strip.to_i
-    if existing_pid && Util.process_exists?(existing_pid)
-      return existing_pid
-    end
-    return nil
-  end
-end
 #--- END. Helper
-
-class ConfigFile
-
-  def initialize(file_path)
-    @file_path = file_path
-    raise 'expecting file_path' unless @file_path
-    @data_read = {}
-    @data = {}
-    data_read
-    data_write if changed?
-  end
-
-  def get(key)
-    @data[key.to_s]
-  end
-
-  def set(key, val)
-    @data[key.to_s] = val
-    data_write if changed?
-  end
-
-  def data_read
-    return unless File.exists?(@file_path)
-    gdata = {}
-    odata = JSON.parse(IO.read(@file_path))
-    odata.each do |k, v|
-      next if k[0] == '_'
-      gdata[k] = v
-    end
-    @data_read = gdata.clone
-    @data = gdata.clone
-  end
-
-  def data_write
-    $logger.info "VpnhConfig. data_write ..."
-    dirname = File.dirname(@file_path)
-    FileUtils.mkdir_p(dirname)
-    data = @data.clone
-    data['_write_ts'] = Time.now.to_i
-    json_str = JSON.pretty_generate(data)
-    IO.write(@file_path, json_str+"\n")
-    data_read
-  end
-
-  def changed?
-    @data_read != @data || !File.exists?(@file_path)
-  end
-
-end
 
 class VpnhConfig
 
@@ -111,7 +48,6 @@ class VpnhMaster
   attr_reader :the_path
 
   def initialize
-    @the_path = File.join('/', 'var', 'opt', 'vpnh')
     @config = VpnhConfig.new(con_path)
   end
 
@@ -119,40 +55,59 @@ class VpnhMaster
     @config
   end
 
-  def server
-    @server ||= VpnhClient.new
+  def client
+    @client ||= VpnhClient.new(self)
   end
 
-  def client
-    @client ||= VpndServer.new
+  def server
+    @server ||= VpnhServer.new(self)
+  end
+
+  def the_path
+    return @the_path if @the_path
+    @the_path = '/var/opt/vpnh'
+    unless Dir.exists?(@the_path)
+      FileUtils.mkdir(@the_path)
+    end
+    return @the_path
   end
 
   def pid_path
-    @pid_path ||= File.join(@the_path, 'lock.pid');
+    @pid_path ||= File.join(the_path, 'lock.pid');
   end
 
   def ipc_path
-    @ipc_path ||= File.join(@the_path, 'ipc.sock');
+    @ipc_path ||= File.join(the_path, 'ipc.sock');
   end
 
   def con_path
-    @con_path ||= File.join(@the_path, 'config.json');
+    @con_path ||= File.join(the_path, 'config.json');
+  end
+
+  def running_server_pid
+    return nil unless File.exists?(pid_path)
+    existing_pid = IO.read(pid_path).strip.to_i
+    if existing_pid && Util.process_exists?(existing_pid)
+      return existing_pid
+    end
+    return nil
   end
 
 end
 
 class VpnhServer
   require 'drb'
-  def initialize
+  def initialize(master)
+    @master = master
     @mainloop_go = true
     @t1 = nil
   end
 
   def ignition
-    if (existing_pid=Shared.running_server_pid)
+    if (existing_pid=@master.running_server_pid)
       raise "Another VpnhServer is already running at PID=#{existing_pid}"
     end
-    IO.write($pid_path, "#{Process.pid}\n")
+    IO.write(@master.pid_path, "#{Process.pid}\n")
     trap("TERM") do
       puts "\n--- Heard SIGTERM ---"
       shutdown
@@ -166,10 +121,10 @@ class VpnhServer
 
   def shutdown
     @mainloop_go = false
-    pid = File.exists?($pid_path) ? IO.read($pid_path).strip.to_i : nil
+    pid = File.exists?(@master.pid_path) ? IO.read(@master.pid_path).strip.to_i : nil
     return unless pid
     return Process.kill(15, pid) unless pid == Process.pid
-    FileUtils.rm_f($pid_path)
+    FileUtils.rm_f(@master.pid_path)
     DRb.stop_service
   end
 
@@ -196,8 +151,8 @@ class VpnhServer
   private
   
   def mainloop
-    FileUtils.rm_f($ipc_path) if File.exists?($ipc_path)
-    DRb.start_service("drbunix://#{$ipc_path}", self)
+    FileUtils.rm_f(@master.ipc_path) if File.exists?(@master.ipc_path)
+    DRb.start_service("drbunix://#{@master.ipc_path}", self)
     @t1 = Thread.new {
       while(@mainloop_go)
         $logger.info "."
@@ -220,7 +175,8 @@ end
 class VpnhClient
   require 'drb'
 
-  def initialize
+  def initialize(master)
+    @master = master
     @server = nil
   end
 
@@ -243,15 +199,14 @@ class VpnhClient
 
   def connect
     return if @server
-    if Shared.running_server_pid && File.exists?($ipc_path)
-      @server = DRbObject.new_with_uri("drbunix://#{$ipc_path}")
+    if @master.running_server_pid && File.exists?(@master.ipc_path)
+      @server = DRbObject.new_with_uri("drbunix://#{@master.ipc_path}")
     end
   end
 end
 
 #--- MAIN
 die_with_usage("only root can run vpnh") unless Util.ami_root?
-FileUtils.mkdir_p($the_path)
 
 command = ARGV.join(" ").chomp
 unless command && command.size > 0 
@@ -262,22 +217,20 @@ if command == 'help' || command == 'h'
   die_with_usage(nil, 0)
 end
 
-vpnc = VpnhClient.new
+master = VpnhMaster.new
 
 if command == 'server'
-  vpnd = VpnhServer.new
-  vpnd.ignition
+  master.server.ignition
 elsif command == 'server daemon'
   Util.daemonize do
-    vpnd = VpnhServer.new
-    vpnd.ignition
+    master.server.ignition
   end
 elsif command == 'server shutdown' || command == 'server stop' || command == 'stop'
   puts 'stopping vpnh server...'
-  vpnc.shutdown
+  master.client.shutdown
   puts 'stopping vpnh server... DONE'
 elsif command == 'status'
-  puts JSON.pretty_generate(vpnc.status)
+  puts JSON.pretty_generate(master.client.status)
 elsif command =~ /^ovpnup(.*)$/
   args = $1.strip.split(/\s+/)
   puts "args=#{args}"
@@ -293,7 +246,7 @@ elsif command =~ /^ovpnup(.*)$/
 elsif command == 'get_default_iface'
   puts Util.get_default_iface
 elsif command =~ /x (\w+)/
-  out = vpnc.public_send($1)
+  out = master.client.public_send($1)
   puts out if out
 else
   die_with_usage
