@@ -3,7 +3,6 @@
 require 'fileutils'
 require 'logger'
 require 'json'
-require 'pp'
 
 require_relative 'Util'
 require_relative 'VpnhMaster.rb'
