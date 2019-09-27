@@ -86,7 +86,10 @@ puts "vpni_name=#{vpni_name}"
 puts "vpni_addr=#{vpni_addr}"
 puts "vpni_mask=#{vpni_mask}"
 
+# persisted one-time setup
+# but idempotent and safe to re-run.
 make_vpnuser
 add_routing_table
 
+# not persisted and must be run everytime.
 add_ip_routes_and_rules(vpni_name, vpni_addr)
