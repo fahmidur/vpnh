@@ -16,10 +16,11 @@ class ConfigFile
   end
 
   def set(key, val)
+    key = key.to_s
     if val
-      @data.delete(key)
+      @data[key] = val
     else
-      @data[key.to_s] = val
+      @data.delete(key)
     end
     data_write if changed?
   end
@@ -37,7 +38,7 @@ class ConfigFile
   end
 
   def data_write
-    $logger.info "VpnhConfig. data_write ..."
+    #$logger.info "VpnhConfig. data_write ..."
     dirname = File.dirname(@file_path)
     FileUtils.mkdir_p(dirname)
     data = @data.clone

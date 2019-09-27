@@ -68,6 +68,8 @@ elsif command =~ /^user_exists\? (.+)/
 elsif command =~ /^config get (.+)/
   key = $1.strip
   puts master.config.get(key)
+elsif command =~ /^config set ([a-zA-Z0-9\-\._]+) (.+)/
+  puts master.config.set($1, $2)
 elsif command =~ /x (\w+)/
   out = master.client.public_send($1)
   puts out if out

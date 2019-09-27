@@ -20,6 +20,17 @@ class VpnhConfig
     return @confile.get(key)
   end
 
+  def set(key, val)
+    key = key.to_s
+    unless is_prop?(key)
+      puts "WARNING: invalid property #{key}"
+      return nil 
+    end
+    setter_meth = (key + '=').to_sym
+    return self.public_send(setter_meth, val) if self.respond_to?(setter_meth)
+    return @confile.set(key, val)
+  end
+
   def is_prop?(key)
     @props.member?(key.to_s)
   end
@@ -31,14 +42,15 @@ class VpnhConfig
       unless all_ifaces.member?(val)
         puts "WARNING: #{val} is not a valid iface"
       end
-      @confile.set(val)
+      @confile.set(:real_iface, val)
+      return real_iface
     else
       default_iface = Util.get_default_iface
       unless default_iface
         puts "WARNING: unable to determine default_iface"
       end
-      @confile.set(default_iface)
-      return
+      @confile.set(:real_iface, default_iface)
+      return real_iface
     end
   end
 
