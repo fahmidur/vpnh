@@ -13,6 +13,13 @@ class VpnhConfig
     @props = Set.new(['real_iface'])
   end
 
+  def to_h
+    @props.inject({}) do |h,k|
+      h[k] = self.get(k)
+      h
+    end
+  end
+
   def get(key)
     key = key.to_s
     return nil unless is_prop?(key)
