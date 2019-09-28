@@ -22,6 +22,12 @@ class VpnhConfig
     unless self.real_iface
       @errors << 'real_iface is required'
     end
+    unless self.vpnh_user
+      @errors << 'vpnh_user is required'
+    end
+    unless self.vpnh_tabl
+      @errors << 'vpnh_tabl is required'
+    end
   end
   
   def is_valid?
@@ -50,6 +56,10 @@ class VpnhConfig
     return @confile.get(key)
   end
 
+  def method_missing(meth, *args, &block)
+    return self.get(meth)
+  end
+
   def set(key, val)
     key = key.to_s
     unless is_prop?(key)
@@ -57,21 +67,19 @@ class VpnhConfig
       return nil 
     end
     setter_meth = (key + '=').to_sym
-    ret = nil
     if self.respond_to?(setter_meth)
-      ret = self.public_send(setter_meth, val)
+      self.public_send(setter_meth, val)
     else
-      ret = @confile.set(key, val)
+      @confile.set(key, val)
     end
     validate!
-    return ret
+    return get(key)
   end
 
   def is_prop?(key)
     @props.member?(key.to_s)
   end
 
-  def real_iface; @confile.get('real_iface'); end;
   def real_iface=(val)
     if val
       all_ifaces = Util.get_all_ifaces
