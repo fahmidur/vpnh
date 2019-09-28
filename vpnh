@@ -45,6 +45,8 @@ elsif command == 'server shutdown' || command == 'server stop' || command == 'st
   puts 'stopping vpnh server... DONE'
 elsif command == 'status'
   puts JSON.pretty_generate(master.client.status)
+elsif command == 'running_server_pid'
+  puts master.running_server_pid
 elsif command =~ /^ovpnup(.*)$/
   args = $1.strip.split(/\s+/)
   puts "args=#{args}"
