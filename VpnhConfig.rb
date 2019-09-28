@@ -1,5 +1,6 @@
 class VpnhConfig
   require_relative 'Util'
+  attr_reader :errors
 
   def initialize(conthing)
     case conthing
@@ -12,6 +13,19 @@ class VpnhConfig
     end
     @props = Set.new(['real_iface', 'vpnh_user', 'vpnh_tabl'])
     set_defaults!
+    @errors = []
+    validate!
+  end
+
+  def validate!
+    @errors = []
+    unless self.real_iface
+      @errors << 'real_iface is required'
+    end
+  end
+  
+  def is_valid?
+    @errors.size == 0
   end
 
   def set_defaults!
@@ -19,6 +33,7 @@ class VpnhConfig
       self.set(:vpnh_user, 'vpnh_user') unless self.get(:vpnh_user)
       self.set(:vpnh_tabl, 'vpnh_tabl') unless self.get(:vpnh_tabl)
     end
+    validate!
   end
 
   def to_h
@@ -42,8 +57,14 @@ class VpnhConfig
       return nil 
     end
     setter_meth = (key + '=').to_sym
-    return self.public_send(setter_meth, val) if self.respond_to?(setter_meth)
-    return @confile.set(key, val)
+    ret = nil
+    if self.respond_to?(setter_meth)
+      ret = self.public_send(setter_meth, val)
+    else
+      ret = @confile.set(key, val)
+    end
+    validate!
+    return ret
   end
 
   def is_prop?(key)
@@ -58,6 +79,7 @@ class VpnhConfig
         puts "WARNING: #{val} is not a valid iface"
       end
       @confile.set(:real_iface, val)
+      validate!
       return real_iface
     else
       default_iface = Util.get_default_iface
@@ -65,6 +87,7 @@ class VpnhConfig
         puts "WARNING: unable to determine default_iface"
       end
       @confile.set(:real_iface, default_iface)
+      validate!
       return real_iface
     end
   end

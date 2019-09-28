@@ -69,6 +69,12 @@ elsif command =~ /^user_exists\? (.+)/
   puts Util.user_exists?($1)
 elsif command == 'config show' || command == 'config get'
   puts JSON.pretty_generate(master.config.to_h)
+  unless master.config.is_valid?
+    puts "--- errors: "
+    master.config.errors.each do |err|
+      puts "* #{err}"
+    end
+  end
 elsif command =~ /^config get (.+)/
   key = $1.strip
   puts master.config.get(key)
