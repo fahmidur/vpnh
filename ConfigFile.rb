@@ -6,6 +6,7 @@ class ConfigFile
     @file_path = file_path
     raise 'expecting file_path' unless @file_path
     @data_read = {}
+    @data_write_lock = false
     @data = {}
     data_read
     data_write if changed?
@@ -13,6 +14,13 @@ class ConfigFile
 
   def get(key)
     @data[key.to_s]
+  end
+
+  def set_multi
+    @data_write_lock = true
+    yield
+    @data_write_lock = false
+    data_write if changed?
   end
 
   def set(key, val)
@@ -38,6 +46,7 @@ class ConfigFile
   end
 
   def data_write
+    return if @data_write_lock
     #$logger.info "VpnhConfig. data_write ..."
     dirname = File.dirname(@file_path)
     FileUtils.mkdir_p(dirname)

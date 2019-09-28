@@ -10,7 +10,15 @@ class VpnhConfig
     else
       raise 'invalid conthing'
     end
-    @props = Set.new(['real_iface'])
+    @props = Set.new(['real_iface', 'vpnh_user', 'vpnh_tabl'])
+    set_defaults!
+  end
+
+  def set_defaults!
+    @confile.set_multi do
+      self.set(:vpnh_user, 'vpnh_user') unless self.get(:vpnh_user)
+      self.set(:vpnh_tabl, 'vpnh_tabl') unless self.get(:vpnh_tabl)
+    end
   end
 
   def to_h
