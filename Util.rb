@@ -1,5 +1,6 @@
 module Util
   require 'set'
+  require 'ostruct'
 
   def self.ami_root?
     Process.euid == 0
@@ -34,22 +35,33 @@ module Util
     '/etc/iproute2/rt_tables'
   end
 
+  def self._rt_table_parseline(line)
+    line.strip!
+    line = line.gsub(/#+(.*)/, '')
+    return nil if line.size == 0 || line =~ /^\s*$/
+    fields = line.split(/\s+/)
+    num = fields[0]
+    str = fields[1]
+    return nil unless str && str.size > 0
+    return nil unless num && num.size > 0 
+    num = num.to_i
+    return OpenStruct.new({
+      :str => str,
+      :num => num,
+    })
+  end
+
   def self.get_routing_tables
     tables = {}
     f = File.open(Util.rt_tables_path)
     f.each_line do |line|
-      line = line.gsub(/#+(.*)/, '')
-      next if line =~ /^\s*$/
-      fields = line.split(/\s+/)
-      num = fields[0]
-      str = fields[1]
-      next unless str && str.size > 0
-      next unless num && num.size > 0 
-      tables[str] = num.to_i
+      data = self._rt_table_parseline(line)
+      next unless data
+      tables[data.str] = data.num
     end
     return tables
   ensure
-    f.close
+    f.close if f
   end
 
   def self.routing_table_add(table_name)
@@ -62,13 +74,41 @@ module Util
       puts "routing_table_add. #{table_name} already exists. SKIPPED"
       return
     end
-    unused_num = 1
-    while routing_tables[table_name]
-      unused_num += 1
+    new_num = 1
+    routing_table_nums = Set.new(routing_tables.values)
+    while routing_table_nums.member?(new_num)
+      new_num += 1
     end
+    cnl = IO.read(Util.rt_tables_path)[-1] == "\n" ? "" : "\n"
     open(Util.rt_tables_path, 'a') do |f|
-      f.puts "1\t#{table_name}"
+      f.puts "#{cnl}#{new_num}\t#{table_name}"
     end
+  end
+
+  def self.routing_table_del(table_name)
+    routing_tables = Util.get_routing_tables
+    unless Util.sys_write_ok?
+      puts "routing_table_del. sys_write denied"
+      return
+    end
+    unless routing_tables[table_name]
+      puts "routing_table_del. #{table_name} does not exist. SKIPPED"
+      return
+    end
+    rt_lines = []
+    f = File.open(Util.rt_tables_path)
+    f.each_line do |line|
+      data = Util._rt_table_parseline(line)
+      next if data && data.str == table_name
+      rt_lines.push(line)
+    end
+    new_rt_table_body = rt_lines.join("\n")
+    puts "--- beg. new rt_table body."
+    puts new_rt_table_body
+    puts "--- end. new rt_table_body."
+    IO.write(Util.rt_tables_path, new_rt_table_body)
+  ensure
+    f.close if f
   end
 
   def self.get_machine_id

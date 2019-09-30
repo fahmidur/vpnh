@@ -73,6 +73,14 @@ elsif command == 'get_default_iface'
   puts Util.get_default_iface
 elsif command == 'get_routing_tables'
   puts JSON.pretty_generate(Util.get_routing_tables)
+elsif command =~ /routing_table_add ([a-zA-Z0-9_]+)/
+  puts Util.routing_table_add($1)
+  puts "---"
+  puts JSON.pretty_generate(Util.get_routing_tables)
+elsif command =~ /routing_table_del ([a-zA-Z0-9_]+)/
+  puts Util.routing_table_del($1)
+  puts "---"
+  puts JSON.pretty_generate(Util.get_routing_tables)
 elsif command == 'get_all_ifaces'
   puts Util.get_all_ifaces.to_a.to_json
 elsif command == 'get_all_users'
