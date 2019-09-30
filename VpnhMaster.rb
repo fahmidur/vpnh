@@ -53,5 +53,25 @@ class VpnhMaster
     return nil
   end
 
+  def setup
+    vpnh_user = @config.get(:vpnh_user)
+    if vpnh_user
+      puts "VpnhMaster. setup. making user=#{vpnh_user}"
+      Util.user_add(vpnh_user)
+    end
+    vpnh_tabl = @config.get(:vpnh_tabl)
+    if vpnh_tabl
+      puts "VpnhMaster. setup. making tabl=#{vpnh_tabl}"
+      Util.routing_table_add(vpnh_tabl)
+    end
+  end
+
+  def ovpn_up(virt_iface, virt_iface_addr)
+    self.setup # idempotent
+  end
+
+  def ovpn_down
+  end
+
 end
 
