@@ -63,6 +63,10 @@ module Util
   ensure
     f.close if f
   end
+  
+  def self.routing_table_exist?(table_name)
+    return Util.get_routing_tables.member?(table_name)
+  end
 
   def self.routing_table_add(table_name)
     routing_tables = Util.get_routing_tables

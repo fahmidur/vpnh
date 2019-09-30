@@ -67,7 +67,43 @@ class VpnhMaster
   end
 
   def ovpn_up(virt_iface, virt_iface_addr)
-    self.setup # idempotent
+    errors = []
+    unless virt_iface
+      errors << "expecting argument virt_iface"
+    end
+    unless virt_iface_addr
+      errors << "expecting argument virt_iface_addr"
+    end
+    if errors.size > 0
+      puts "VpnhMster. ovpn_up. errors:"
+      error.each {|err| puts "* #{err}" }
+      return false
+    end
+    vpnh_user = @config.vpnh_user
+    vpnh_tabl = @config.vpnh_tabl
+    unless vpnh_user
+      errors << "expecting config.vpnh_user"
+    end
+    unless vpnh_tabl
+      errors << "expecting config.vpnh_tabl"
+    end
+    if errors.size > 0
+      puts "VpnhMster. ovpn_up. errors:"
+      errorr.each {|err| puts "* #{err}" }
+      return false
+    end
+    self.setup
+    unless Util.routing_table_exists?(vpnh_tabl)
+      errors << "failed to create routing_table #{vpnh_tabl}"
+    end
+    unless Util.user_exists?(vpnh_tabl)
+      errors << "failed to create user #{vpnh_user}"
+    end
+    if errors.size > 0
+      puts "VpnhMster. ovpn_up. errors:"
+      errors.each {|err| puts "* #{err}" }
+      return false
+    end
   end
 
   def ovpn_down
