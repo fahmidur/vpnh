@@ -30,9 +30,13 @@ module Util
     return username
   end
 
+  def self.rt_tables_path
+    '/etc/iproute2/rt_tables'
+  end
+
   def self.get_routing_tables
     tables = {}
-    f = File.open('/etc/iproute2/rt_tables')
+    f = File.open(Util.rt_tables_path)
     f.each_line do |line|
       line = line.gsub(/#+(.*)/, '')
       next if line =~ /^\s*$/
@@ -58,7 +62,13 @@ module Util
       puts "routing_table_add. #{table_name} already exists. SKIPPED"
       return
     end
-    # TODO
+    unused_num = 1
+    while routing_tables[table_name]
+      unused_num += 1
+    end
+    open(Util.rt_tables_path, 'a') do |f|
+      f.puts "1\t#{table_name}"
+    end
   end
 
   def self.get_machine_id
