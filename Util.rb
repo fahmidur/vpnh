@@ -30,6 +30,37 @@ module Util
     return username
   end
 
+  def self.get_routing_tables
+    tables = {}
+    f = File.open('/etc/iproute2/rt_tables')
+    f.each_line do |line|
+      line = line.gsub(/#+(.*)/, '')
+      next if line =~ /^\s*$/
+      fields = line.split(/\s+/)
+      num = fields[0]
+      str = fields[1]
+      next unless str && str.size > 0
+      next unless num && num.size > 0 
+      tables[str] = num.to_i
+    end
+    return tables
+  ensure
+    f.close
+  end
+
+  def self.routing_table_add(table_name)
+    routing_tables = Util.get_routing_tables
+    unless Util.sys_write_ok?
+      puts "routing_table_add. sys_write denied"
+      return
+    end
+    if routing_tables[table_name]
+      puts "routing_table_add. #{table_name} already exists. SKIPPED"
+      return
+    end
+    # TODO
+  end
+
   def self.get_machine_id
     IO.read('/etc/machine-id').strip
   end

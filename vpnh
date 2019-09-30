@@ -71,6 +71,8 @@ elsif command =~ /^ovpnup(.*)$/
   puts "vpni_mask=#{vpni_mask}"
 elsif command == 'get_default_iface'
   puts Util.get_default_iface
+elsif command == 'get_routing_tables'
+  puts JSON.pretty_generate(Util.get_routing_tables)
 elsif command == 'get_all_ifaces'
   puts Util.get_all_ifaces.to_a.to_json
 elsif command == 'get_all_users'
