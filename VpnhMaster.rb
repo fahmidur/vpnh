@@ -106,7 +106,19 @@ class VpnhMaster
     end
   end
 
-  def ovpn_down
+  def ovpn_down(virt_iface, virt_iface_addr)
+    errors = []
+    unless virt_iface
+      errors << "expecting argument virt_iface"
+    end
+    unless virt_iface_addr
+      errors << "expecting argument virt_iface_addr"
+    end
+    if errors.size > 0
+      puts "VpnhMster. ovpn_down. errors:"
+      error.each {|err| puts "* #{err}" }
+      return false
+    end
   end
 
 end

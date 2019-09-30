@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+ARGV.each_with_index do |arg, idx|
+  puts "ARGV[#{idx}] = #{arg}"
+end

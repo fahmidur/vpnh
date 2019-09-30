@@ -57,8 +57,13 @@ elsif command == 'status'
   puts JSON.pretty_generate(master.client.status)
 elsif command == 'running_server_pid'
   puts master.running_server_pid
-elsif command =~ /^ovpn_up(.*)$/
-  args = $1.strip.split(/\s+/)
+elsif command =~ /^ovpn_(up|down)(.*)$/
+  up_or_down = $1
+  unless ['up', 'down'].member?(up_or_down)
+    puts "ERROR. expecting up or down"
+    return 1
+  end
+  args = $2.strip.split(/\s+/)
   puts "args=#{args}"
   unless args.size === 6
     die_with_usage('expecting 6 arguments from openvpn')
@@ -69,6 +74,8 @@ elsif command =~ /^ovpn_up(.*)$/
   puts "vpni_name=#{vpni_name}"
   puts "vpni_addr=#{vpni_addr}"
   puts "vpni_mask=#{vpni_mask}"
+  meth = "ovpn_#{up_or_down}".to_sym
+  master.public_send(meth, vpni_name, vpni_addr)
 elsif command == 'get_default_iface'
   puts Util.get_default_iface
 elsif command == 'get_routing_tables'
