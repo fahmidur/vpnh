@@ -4,6 +4,7 @@ class VpnhMaster
   require_relative 'VpnhConfig'
   require_relative 'VpnhServer'
   require_relative 'VpnhClient'
+  require_relative 'IpAddrString'
 
   attr_reader :the_path
 
@@ -66,7 +67,19 @@ class VpnhMaster
     end
   end
 
+  def in_error?(errors)
+    if errors.size > 0
+      puts "VpnhMster. errors:"
+      error.each {|err| puts "* #{err}" }
+    end
+    return errors.size > 0
+  end
+
   def ovpn_up(virt_iface, virt_iface_addr)
+    unless Util.sys_write_ok?
+      puts "sys_write denied"
+      return false
+    end
     errors = []
     unless virt_iface
       errors << "expecting argument virt_iface"
@@ -74,11 +87,7 @@ class VpnhMaster
     unless virt_iface_addr
       errors << "expecting argument virt_iface_addr"
     end
-    if errors.size > 0
-      puts "VpnhMster. ovpn_up. errors:"
-      error.each {|err| puts "* #{err}" }
-      return false
-    end
+    return false if in_error?(errors)
     vpnh_user = @config.vpnh_user
     vpnh_tabl = @config.vpnh_tabl
     unless vpnh_user
@@ -87,11 +96,7 @@ class VpnhMaster
     unless vpnh_tabl
       errors << "expecting config.vpnh_tabl"
     end
-    if errors.size > 0
-      puts "VpnhMster. ovpn_up. errors:"
-      errorr.each {|err| puts "* #{err}" }
-      return false
-    end
+    return false if in_error?(errors)
     self.setup
     unless Util.routing_table_exists?(vpnh_tabl)
       errors << "failed to create routing_table #{vpnh_tabl}"
@@ -99,14 +104,20 @@ class VpnhMaster
     unless Util.user_exists?(vpnh_tabl)
       errors << "failed to create user #{vpnh_user}"
     end
-    if errors.size > 0
-      puts "VpnhMster. ovpn_up. errors:"
-      errors.each {|err| puts "* #{err}" }
+    return if in_error?(errors)
+    #--- do stuff
+    virt_iface_addr = IpAddrString.new(virt_iface_addr)
+    unless virt_iface_addr.valid?
+      puts "invalid ip address: #{virt_iface_addr}"
       return false
     end
   end
 
   def ovpn_down(virt_iface, virt_iface_addr)
+    unless Util.sys_write_ok?
+      puts "sys_write denied"
+      return false
+    end
     errors = []
     unless virt_iface
       errors << "expecting argument virt_iface"
@@ -114,11 +125,7 @@ class VpnhMaster
     unless virt_iface_addr
       errors << "expecting argument virt_iface_addr"
     end
-    if errors.size > 0
-      puts "VpnhMster. ovpn_down. errors:"
-      error.each {|err| puts "* #{err}" }
-      return false
-    end
+    return false if in_error?(errors)
   end
 
 end
