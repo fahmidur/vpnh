@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+exec ./vpnh ovpn_down $*
