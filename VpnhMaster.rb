@@ -105,12 +105,42 @@ class VpnhMaster
       errors << "failed to create user #{vpnh_user}"
     end
     return if in_error?(errors)
-    #--- do stuff
+
     virt_iface_addr = IpAddr.new(virt_iface_addr)
     unless virt_iface_addr.valid?
       puts "invalid ip address: #{virt_iface_addr}"
       return false
     end
+
+    `ip route add #{virt_iface_addr.dot0.cidr(24)} dev #{virt_iface} src #{virt_iface_addr} table #{vpnh_tabl}`
+    `ip route add default via #{virt_iface_addr.dot1} dev #{virt_iface} table #{vpnh_tabl}`
+    # delete old rules relating vpnh_tabl
+    rules_to_del = []
+    `ip rule show`.split("\n").each do |line|
+      line.chomp!
+      puts "ip rule show: #{line}"
+      if line =~ /^(\d+):\s+(.+)$/
+        priority = $1
+        rule = $2
+        if rule =~ /\b#{vpnh_tabl}\b/
+          rules_to_del << rule
+        end
+      end
+    end
+    rules_to_del.each do |rule|
+      puts "deleting rule = |#{rule}|"
+      `ip rule del #{rule}`
+    end
+    `ip rule add from #{virt_iface_addr.cidr(32)} table #{vpnh_tabl}`
+    `ip rule add to #{virt_iface_addr.cidr(32)} table #{vpnh_tabl}`
+    vpnh_user_id = `id -u #{vpnh_user}`.strip.to_i
+    unless vpnh_user_id
+      puts "ERROR: failed to get vpnh_user id"
+      return false
+    end
+    puts "adding ip rule uidrange for vpnh_user..."
+    puts `ip rule add uidrange #{vpnh_user_id}-#{vpnh_user_id} lookup #{vpnh_tabl}`
+    puts "done"
   end
 
   def ovpn_down(virt_iface, virt_iface_addr)
