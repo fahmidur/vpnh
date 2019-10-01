@@ -1,20 +1,20 @@
 class IpAddr
   attr_reader :bytes
+  attr_reader :error
 
   def initialize(thing)
     @bytes = []
     @dotmap = {}
-    @error = false
+    @error = nil
     if thing.is_a?(String)
       thing = thing.strip
       if thing =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/
         # ipv4 quad notation
         @bytes = [$1.to_i, $2.to_i, $3.to_i, $4.to_i]
       elsif thing =~ /([0-9a-f]{4}):([0-9a-f]{4}):([0-9a-f]{4}):([0-9a-f]{4}):([0-9a-f]{4}):([0-9a-f]{4}):([0-9a-f]{4}):([0-9a-f]{4})/i
-        puts "-- here ---"
         @bytes = [$1, $2, $3, $4, $5, $6, $7, $8].map {|s| s.scan(/../).map(&:hex) }.flatten
       else
-        @error = true
+        @error = 'invalid string initializer'
       end
     elsif thing.is_a?(IpAddr)
       @bytes = thing.bytes.clone
@@ -29,7 +29,7 @@ class IpAddr
   end
 
   def valid?
-    !!@error
+    @error == nil
   end
 
   def cidr(n)
