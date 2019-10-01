@@ -4,7 +4,7 @@ class VpnhMaster
   require_relative 'VpnhConfig'
   require_relative 'VpnhServer'
   require_relative 'VpnhClient'
-  require_relative 'IpAddrString'
+  require_relative 'IpAddr'
 
   attr_reader :the_path
 
@@ -106,7 +106,7 @@ class VpnhMaster
     end
     return if in_error?(errors)
     #--- do stuff
-    virt_iface_addr = IpAddrString.new(virt_iface_addr)
+    virt_iface_addr = IpAddr.new(virt_iface_addr)
     unless virt_iface_addr.valid?
       puts "invalid ip address: #{virt_iface_addr}"
       return false
