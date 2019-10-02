@@ -70,22 +70,31 @@ class VpnhMaster
     return false if in_error?(errors)
     # make vpnh_user
     puts "VpnhMaster. setup. making user=#{vpnh_user}"
-    Util.user_add(vpnh_user)
+    Util.user_add(vpnh_user) # idempotent
     unless Util.user_exists?(vpnh_user)
       puts "ERROR: failed to make vpnh_user=#{vpnh_user}" 
       return false
     end
     # make vpnh_table
     puts "VpnhMaster. setup. making tabl=#{vpnh_tabl}"
-    Util.routing_table_add(vpnh_tabl)
+    Util.routing_table_add(vpnh_tabl) #idempotent
     unless Util.routing_table_exists?(vpnh_tabl)
       puts "ERROR: failed to make vpnh_table=#{vpnh_tabl}"
       return false
     end
     # block vpnh_user from using real_iface
-    puts "VpnhMaster. setup. blocking user=#{vpnh_user} from iface=#{real_iface}"
+    puts "VpnhMaster. setup. iptables block user=#{vpnh_user} from iface=#{real_iface}"
     iptables_path = `which iptables`.strip
-    Util.run("#{iptables_path} -A OUTPUT -o #{real_iface} -m owner --uid-owner #{vpnh_user} -j REJECT")
+    unless iptables_path && File.exists?(iptables_path)
+      puts "ERROR: unable to find iptables_path"
+      return false
+    end
+    iptables_rule = "-o #{real_iface} -m owner --uid-owner #{vpnh_user} -j REJECT"
+    if Util.run("#{iptables_path} -C OUTPUT #{iptables_rule}").excode == 0
+      Util.run("#{iptables_path} -A OUTPUT #{iptables_rule}")
+    else
+      puts "iptables rule already exists. SKIPPED"
+    end
     return true
   end
 
@@ -138,7 +147,7 @@ class VpnhMaster
       end
     end
     rules_to_del.each do |rule|
-      puts "deleting rule = |#{rule}|"
+      puts "deleting old rule = |#{rule}|"
       Util.run("ip rule del #{rule}")
     end
     Util.run("ip rule add from #{virt_iface_addr.cidr(32)} table #{vpnh_tabl}")

@@ -2,13 +2,44 @@ module Util
   require 'set'
   require 'ostruct'
 
+  class Command
+    attr_reader :return
+    attr_reader :stdout
+    def initialize(command)
+      @stdout = `#{command}`
+      @return = $?
+    end
+    def out
+      @stdout.strip
+    end
+    def stdout_present?
+      @stdout && @stdout !~ /^\s*$/
+    end
+    def excode
+      @return.exitstatus
+    end
+    def each_line
+      self.lines.each do |line|
+        yield line
+      end
+    end
+    def lines
+      @stdout.split("\n")
+    end
+    def success?
+      @return.exitstatus == 0
+    end
+    def failure?
+      @return.exitstatus != 0
+    end
+  end
+
   def self.run(command)
     puts "Util.run > #{command}"
-    res = `#{command}`
-    puts res if res && res.strip.size > 0
-    exitstatus = $?.exitstatus
-    puts "Util.run > exit=#{exitstatus}"
-    return exitstatus == 0
+    com = Command.new(command)
+    puts com.stdout if com.stdout_present?
+    puts "Util.run > exit=#{com.excode}"
+    return com
   end
 
   def self.ami_root?
