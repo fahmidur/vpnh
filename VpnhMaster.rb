@@ -69,7 +69,7 @@ class VpnhMaster
 
   def in_error?(errors)
     if errors.size > 0
-      puts "VpnhMster. errors:"
+      puts "VpnhMaster. errors:"
       errors.each {|err| puts "* #{err}" }
     end
     return errors.size > 0
@@ -101,7 +101,7 @@ class VpnhMaster
     unless Util.routing_table_exists?(vpnh_tabl)
       errors << "failed to create routing_table #{vpnh_tabl}"
     end
-    unless Util.user_exists?(vpnh_tabl)
+    unless Util.user_exists?(vpnh_user)
       errors << "failed to create user #{vpnh_user}"
     end
     return if in_error?(errors)
