@@ -46,6 +46,28 @@ module Util
     Command.new("which #{prog_name}").out
   end
 
+  def self.ip_rule_del_m(table_name)
+    rules_to_del = []
+    unless table_name
+      puts "ERROR: ip_rule_del_m. expecting table_name"
+      return false
+    end
+    Util.run("ip rule show").each_line do |line|
+      line.chomp!
+      next unless line =~ /^(\d+):\s+(.+)$/
+      priority = $1
+      rule = $2
+      if rule =~ /\b#{table_name}\b/
+        rules_to_del << rule
+      end
+    end
+    rules_to_del.each do |rule|
+      puts "ip_rule_del_m. deleting rule: |#{rule}|"
+      Util.run("ip rule del #{rule}")
+    end
+    return true
+  end
+
   def self.iptables_has(chain, rule_spec)
     iptables_path = Util.which("iptables")
     unless iptables_path

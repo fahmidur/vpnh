@@ -127,25 +127,10 @@ class VpnhMaster
     #---
     Util.run("ip route add #{virt_iface_addr.dot0.cidr(24)} dev #{virt_iface} src #{virt_iface_addr} table #{vpnh_tabl}")
     Util.run("ip route add default via #{virt_iface_addr.dot1} dev #{virt_iface} table #{vpnh_tabl}")
-    # delete old rules relating vpnh_tabl
-    rules_to_del = []
-    `ip rule show`.split("\n").each do |line|
-      line.chomp!
-      puts "ip rule show: #{line}"
-      next unless line =~ /^(\d+):\s+(.+)$/
-      priority = $1
-      rule = $2
-      if rule =~ /\b#{vpnh_tabl}\b/
-        rules_to_del << rule
-      end
-    end
-    rules_to_del.each do |rule|
-      puts "deleting old rule = |#{rule}|"
-      Util.run("ip rule del #{rule}")
-    end
+    Util.ip_rule_del_m(vpnh_tabl) # delete old ip rules
     Util.run("ip rule add from #{virt_iface_addr.cidr(32)} table #{vpnh_tabl}")
     Util.run("ip rule add to #{virt_iface_addr.cidr(32)} table #{vpnh_tabl}")
-    vpnh_user_id = `id -u #{vpnh_user}`.strip.to_i
+    vpnh_user_id = Util.run("id -u #{vpnh_user}").out.to_i
     unless vpnh_user_id
       puts "ERROR: failed to get user id of vpnh_user=#{vpnh_user}"
       return false
