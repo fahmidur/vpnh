@@ -6,11 +6,19 @@ module Util
     attr_reader :return
     attr_reader :stdout
     def initialize(command)
+      puts "Command < #{command}"
       @stdout = `#{command}`
       @return = $?
+      self.stdout_puts
+      puts "Command > excode=#{self.excode}"
     end
     def out
       @stdout.strip
+    end
+    def stdout_puts
+      return unless self.stdout_present?
+      print @stdout
+      puts unless @stdout[-1] == "\n"
     end
     def stdout_present?
       @stdout && @stdout !~ /^\s*$/
@@ -24,7 +32,7 @@ module Util
       end
     end
     def lines
-      @stdout.split("\n")
+      @stdout.strip.split("\n")
     end
     def success?
       @return.exitstatus == 0
@@ -63,10 +71,8 @@ module Util
   end
 
   def self.run(command)
-    puts "Util.run > #{command}"
     com = Command.new(command)
     puts com.stdout if com.stdout_present?
-    puts "Util.run > exit=#{com.excode}"
     return com
   end
 
