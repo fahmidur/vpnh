@@ -70,7 +70,7 @@ class VpnhMaster
   def in_error?(errors)
     if errors.size > 0
       puts "VpnhMster. errors:"
-      error.each {|err| puts "* #{err}" }
+      errors.each {|err| puts "* #{err}" }
     end
     return errors.size > 0
   end
