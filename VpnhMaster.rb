@@ -162,13 +162,10 @@ class VpnhMaster
       return false
     end
     errors = []
-    unless virt_iface
-      errors << "expecting argument virt_iface"
-    end
-    unless virt_iface_addr
-      errors << "expecting argument virt_iface_addr"
-    end
+    errors << "expecting argument virt_iface" unless virt_iface
+    errors << "expecting argument virt_iface_addr" unless virt_iface_addr
     return false if in_error?(errors)
+    return true
   end
 
 end

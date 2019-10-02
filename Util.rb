@@ -53,7 +53,7 @@ module Util
       return false
     end
     com = Command.new("#{iptables_path} -C #{chain} #{rule_spec}")
-    return com.excode != 0
+    return com.excode == 0
   end
 
   def self.iptables_add(chain, rule_spec, idem=true)
