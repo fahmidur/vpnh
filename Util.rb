@@ -24,7 +24,10 @@ module Util
     raise ArgumentError.new('expecting string username') unless username.is_a?(String)
     raise ArgumentError.new('invalid username') unless username =~ /^\w+$/
     users = Util.get_all_users
-    return nil if users.member?(username)
+    if users.member?(username)
+      puts "user_add. user #{username} already exists. SKIPPED"
+      return username
+    end
     puts "user_add. adding user username=#{username}"
     res = `useradd -m #{username}`
     puts "user_add. useradd: #{res}"
