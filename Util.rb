@@ -2,6 +2,15 @@ module Util
   require 'set'
   require 'ostruct'
 
+  def self.run(command)
+    puts "Util.run > #{command}"
+    res = `#{command}`
+    puts res if res && res.strip.size > 0
+    exitstatus = $?.exitstatus
+    puts "Util.run > exit=#{exitstatus}"
+    return exitstatus == 0
+  end
+
   def self.ami_root?
     Process.euid == 0
   end

@@ -54,17 +54,39 @@ class VpnhMaster
     return nil
   end
 
+  # must succeed before ovpn_up
   def setup
+    unless Util.sys_write_ok?
+      puts "sys_write denied"
+      return false
+    end
+    errors = []
     vpnh_user = @config.get(:vpnh_user)
-    if vpnh_user
-      puts "VpnhMaster. setup. making user=#{vpnh_user}"
-      Util.user_add(vpnh_user)
-    end
     vpnh_tabl = @config.get(:vpnh_tabl)
-    if vpnh_tabl
-      puts "VpnhMaster. setup. making tabl=#{vpnh_tabl}"
-      Util.routing_table_add(vpnh_tabl)
+    real_iface = @config.get(:real_iface)
+    errors << 'expecting config.vpnh_user'  unless vpnh_user
+    errors << 'expecting config.vpnh_tabl'  unless vpnh_tabl
+    errors << 'expecting config.real_iface' unless real_iface
+    return false if in_error?(errors)
+    # make vpnh_user
+    puts "VpnhMaster. setup. making user=#{vpnh_user}"
+    Util.user_add(vpnh_user)
+    unless Util.user_exists?(vpnh_user)
+      puts "ERROR: failed to make vpnh_user=#{vpnh_user}" 
+      return false
     end
+    # make vpnh_table
+    puts "VpnhMaster. setup. making tabl=#{vpnh_tabl}"
+    Util.routing_table_add(vpnh_tabl)
+    unless Util.routing_table_exists?(vpnh_tabl)
+      puts "ERROR: failed to make vpnh_table=#{vpnh_tabl}"
+      return false
+    end
+    # block vpnh_user from using real_iface
+    puts "VpnhMaster. setup. blocking user=#{vpnh_user} from iface=#{real_iface}"
+    iptables_path = `which iptables`.strip
+    Util.run("#{iptables_path} -A OUTPUT -o #{real_iface} -m owner --uid-owner #{vpnh_user} -j REJECT")
+    return true
   end
 
   def in_error?(errors)
@@ -80,67 +102,56 @@ class VpnhMaster
       puts "sys_write denied"
       return false
     end
+    #---
     errors = []
-    unless virt_iface
-      errors << "expecting argument virt_iface"
-    end
-    unless virt_iface_addr
-      errors << "expecting argument virt_iface_addr"
-    end
+    errors << "expecting argument virt_iface" unless virt_iface
+    errors << "expecting argument virt_iface_addr" unless virt_iface_addr
     return false if in_error?(errors)
-    vpnh_user = @config.vpnh_user
-    vpnh_tabl = @config.vpnh_tabl
-    unless vpnh_user
-      errors << "expecting config.vpnh_user"
-    end
-    unless vpnh_tabl
-      errors << "expecting config.vpnh_tabl"
-    end
-    return false if in_error?(errors)
-    self.setup
-    unless Util.routing_table_exists?(vpnh_tabl)
-      errors << "failed to create routing_table #{vpnh_tabl}"
-    end
-    unless Util.user_exists?(vpnh_user)
-      errors << "failed to create user #{vpnh_user}"
-    end
-    return if in_error?(errors)
-
+    #---
     virt_iface_addr = IpAddr.new(virt_iface_addr)
     unless virt_iface_addr.valid?
-      puts "invalid ip address: #{virt_iface_addr}"
+      puts "ERROR: invalid virt_iface_addr=#{virt_iface_addr}"
       return false
     end
-
-    `ip route add #{virt_iface_addr.dot0.cidr(24)} dev #{virt_iface} src #{virt_iface_addr} table #{vpnh_tabl}`
-    `ip route add default via #{virt_iface_addr.dot1} dev #{virt_iface} table #{vpnh_tabl}`
+    #---
+    vpnh_user  = @config.vpnh_user
+    vpnh_tabl  = @config.vpnh_tabl
+    real_iface = @config.real_iface
+    #---
+    unless self.setup
+      puts "ERROR: setup failed"
+      return false
+    end
+    #---
+    Util.run("ip route add #{virt_iface_addr.dot0.cidr(24)} dev #{virt_iface} src #{virt_iface_addr} table #{vpnh_tabl}")
+    Util.run("ip route add default via #{virt_iface_addr.dot1} dev #{virt_iface} table #{vpnh_tabl}")
     # delete old rules relating vpnh_tabl
     rules_to_del = []
     `ip rule show`.split("\n").each do |line|
       line.chomp!
       puts "ip rule show: #{line}"
-      if line =~ /^(\d+):\s+(.+)$/
-        priority = $1
-        rule = $2
-        if rule =~ /\b#{vpnh_tabl}\b/
-          rules_to_del << rule
-        end
+      next unless line =~ /^(\d+):\s+(.+)$/
+      priority = $1
+      rule = $2
+      if rule =~ /\b#{vpnh_tabl}\b/
+        rules_to_del << rule
       end
     end
     rules_to_del.each do |rule|
       puts "deleting rule = |#{rule}|"
-      `ip rule del #{rule}`
+      Util.run("ip rule del #{rule}")
     end
-    `ip rule add from #{virt_iface_addr.cidr(32)} table #{vpnh_tabl}`
-    `ip rule add to #{virt_iface_addr.cidr(32)} table #{vpnh_tabl}`
+    Util.run("ip rule add from #{virt_iface_addr.cidr(32)} table #{vpnh_tabl}")
+    Util.run("ip rule add to #{virt_iface_addr.cidr(32)} table #{vpnh_tabl}")
     vpnh_user_id = `id -u #{vpnh_user}`.strip.to_i
     unless vpnh_user_id
-      puts "ERROR: failed to get vpnh_user id"
+      puts "ERROR: failed to get user id of vpnh_user=#{vpnh_user}"
       return false
     end
     puts "adding ip rule uidrange for vpnh_user..."
-    puts `ip rule add uidrange #{vpnh_user_id}-#{vpnh_user_id} lookup #{vpnh_tabl}`
-    puts "done"
+    Util.run("ip rule add uidrange #{vpnh_user_id}-#{vpnh_user_id} lookup #{vpnh_tabl}")
+    puts "--- done"
+    return true
   end
 
   def ovpn_down(virt_iface, virt_iface_addr)

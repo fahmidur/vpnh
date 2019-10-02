@@ -75,7 +75,8 @@ elsif command =~ /^ovpn_(up|down)(.*)$/
   puts "vpni_addr=#{vpni_addr}"
   puts "vpni_mask=#{vpni_mask}"
   meth = "ovpn_#{up_or_down}".to_sym
-  master.public_send(meth, vpni_name, vpni_addr)
+  ret = master.public_send(meth, vpni_name, vpni_addr)
+  exit (ret ? 0 : 1)
 elsif command == 'get_default_iface'
   puts Util.get_default_iface
 elsif command == 'get_routing_tables'
