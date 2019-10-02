@@ -84,16 +84,9 @@ class VpnhMaster
     end
     # block vpnh_user from using real_iface
     puts "VpnhMaster. setup. iptables block user=#{vpnh_user} from iface=#{real_iface}"
-    iptables_path = `which iptables`.strip
-    unless iptables_path && File.exists?(iptables_path)
-      puts "ERROR: unable to find iptables_path"
+    unless Util.iptables_add("OUTPUT", "-o #{real_iface} -m owner --uid-owner #{vpnh_user} -j REJECT")
+      puts "ERROR: iptables_add failed"
       return false
-    end
-    iptables_rule = "-o #{real_iface} -m owner --uid-owner #{vpnh_user} -j REJECT"
-    if Util.run("#{iptables_path} -C OUTPUT #{iptables_rule}").excode == 0
-      Util.run("#{iptables_path} -A OUTPUT #{iptables_rule}")
-    else
-      puts "iptables rule already exists. SKIPPED"
     end
     return true
   end

@@ -34,6 +34,34 @@ module Util
     end
   end
 
+  def self.which(prog_name)
+    Command.new("which #{prog_name}").out
+  end
+
+  def self.iptables_has(chain, rule_spec)
+    iptables_path = Util.which("iptables")
+    unless iptables_path
+      puts "ERROR: unable to find iptables_path"
+      return false
+    end
+    com = Command.new("#{iptables_path} -C #{chain} #{rule_spec}")
+    return com.excode != 0
+  end
+
+  def self.iptables_add(chain, rule_spec, idem=true)
+    iptables_path = Util.which("iptables")
+    unless iptables_path
+      puts "ERROR: unable to find iptables_path"
+      return false
+    end
+    if idem && Util.iptables_has(chain, rule_spec)
+      puts "iptables. chain=#{chain} rule_spec=#{rule_spec} already exists. --- SKIPPED"
+      return true
+    end
+    com = Command.new("#{iptables_path} -A #{chain} #{rule_spec}")
+    return com
+  end
+
   def self.run(command)
     puts "Util.run > #{command}"
     com = Command.new(command)
