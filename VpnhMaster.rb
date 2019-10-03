@@ -19,8 +19,8 @@ class VpnhMaster
   end
 
   def semver_read(path)
-    return [-1, -1, -1] unless File.exists(path)
-    IO.read(path).strip.split('.')[0..2].map*(&:to_i)
+    return [-1, -1, -1] unless File.exists?(path)
+    IO.read(path).strip.split('.')[0..2].map(&:to_i)
   end
 
   def co_ensure
@@ -35,8 +35,9 @@ class VpnhMaster
       puts "co_ensure. skipped. version is same"
       return
     end
-    puts "co_ensure. copy co from self"
-    FileUtils.cp_r(__dir__, co_path)
+    puts "co_ensure. copying co from here..."
+    FileUtils.cp_r(File.join(__dir__, '.'), co_path)
+    puts "co_ensure. copyzzz co from here... DONE"
   end
 
   def config

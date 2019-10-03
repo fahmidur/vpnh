@@ -1,3 +1,4 @@
 #!/usr/bin/env sh
 
-exec ./vpnh ovpn_down $*
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+exec "$SCRIPTPATH/vpnh" ovpn_down $*
