@@ -51,8 +51,8 @@ class Ovpns
       # vpnh modifications
       olines << '#vpnh{'
       olines << 'route-nopull'
-      olines << "up #{master.ovpn_up_path}"
-      olines << "down #{master.ovpn_down_path}"
+      olines << "up #{master.co_ovpn_up_path}"
+      olines << "down #{master.co_ovpn_down_path}"
       olines << '#vpnh}'
       IO.write(new_filepath, olines.join("\n"))
     end

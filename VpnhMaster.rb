@@ -143,11 +143,11 @@ class VpnhMaster
     return errors.size > 0
   end
 
-  def ovpn_up_path
+  def co_ovpn_up_path
     return File.join(co_path, "ovpn_up")
   end
 
-  def ovpn_down_path
+  def co_ovpn_down_path
     return File.join(co_path, "ovpn_down")
   end
 
