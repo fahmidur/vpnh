@@ -9,6 +9,13 @@ class Auths
     FileUtils.mkdir_p(@path) unless Dir.exists?(@path)
   end
 
+  def flush
+    self.all.each do |name, val|
+      next unless name
+      self.del(name)
+    end
+  end
+
   def all
     out = {}
     Dir.entries(@path).each do |name|

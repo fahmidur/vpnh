@@ -109,6 +109,9 @@ elsif command =~ /^config set ([a-zA-Z0-9\-\._]+) (.+)/
   puts master.config.set(key, val)
   puts "---"
   config_show(master)
+elsif command == 'auths flush'
+  master.auths.flush
+  puts "OK. all auths removed"
 elsif command =~ /^auths add (\w+) ([^\s]+) (.+)$/
   name = $1
   user = $2
