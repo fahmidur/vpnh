@@ -4,6 +4,7 @@ class VpnhMaster
   require_relative 'VpnhConfig'
   require_relative 'VpnhServer'
   require_relative 'VpnhClient'
+  require_relative 'OvpnBag'
   require_relative 'IpAddr'
 
   attr_reader :the_path
@@ -14,6 +15,10 @@ class VpnhMaster
 
   def config
     @config
+  end
+
+  def ovpn_bag
+    @ovpn_bag || OvpnBag.new(self, self.ovpn_bag_path)
   end
 
   def client
@@ -43,6 +48,10 @@ class VpnhMaster
 
   def con_path
     @con_path ||= File.join(the_path, 'config.json');
+  end
+
+  def ovpn_bag_path
+    @ovpn_bag_path ||= File.join(the_path, 'ovpn_bag');
   end
 
   def running_server_pid
