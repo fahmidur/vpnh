@@ -1,8 +1,10 @@
 class Ovpns
   require 'fileutils'
   require 'securerandom'
+
   attr_reader :master
   attr_reader :path
+
   def initialize(master, path)
     @master = master
     @path = path
