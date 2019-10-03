@@ -15,9 +15,6 @@ class VpnhMaster
     co_ensure
   end
 
-  def version
-  end
-
   def semver_read(path)
     return [-1, -1, -1] unless File.exists?(path)
     IO.read(path).strip.split('.')[0..2].map(&:to_i)
