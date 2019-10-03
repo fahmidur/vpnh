@@ -11,32 +11,47 @@ class Ovpns
     FileUtils.mkdir_p(path) unless Dir.exists?(path)
   end
 
+  def flush
+    Dir.entries(@path).each do |filename|
+      next if filename == "." || filename == ".."
+      next unless filename =~ /^(.+)\.ovpn$/
+      name = $1
+      self.del(name)
+    end
+    return true
+  end
+
   def all
     out = {}
     Dir.entries(@path).each do |filename|
       next if filename == "." || filename == ".."
       next unless filename =~ /^(.+)\.ovpn$/
-      id = $1
-      out[id] = self.get(id)
+      name = $1
+      out[name] = self.get(name)
     end
     return out
   end
 
-  def add(filepath)
+  def add(filepath, name=nil)
     unless File.exists?(filepath)
       puts "ERROR: no such file at #{filepath}"
       return false
     end
-    id = SecureRandom.hex
-    new_filename = id_to_filename(id)
+    name = SecureRandom.hex unless name
+    unless name =~ /^[a-zA-Z0-9_\.\-]+$/
+      puts "ERROR: invalid name #{name}"
+      return false
+    end
+    new_filename = name_to_filename(name)
     new_filepath = File.join(@path, new_filename)
     # TODO:
     # ensure route-nopull
     # add the up/down scripts
     # add user/pass if provided
     #FileUtils.cp(filepath, new_filepath)
+    olines = []
+    file_open_success = false
     File.open(filepath) do |f|
-      olines = []
       inside_vpnh = false
       f.each_line do |line|
         line.chomp!
@@ -58,29 +73,31 @@ class Ovpns
       olines << "up #{@master.co_ovpn_up_path}"
       olines << "down #{@master.co_ovpn_down_path}"
       olines << '#vpnh}'
+      file_open_success = true
+    end
+    if file_open_success
       IO.write(new_filepath, olines.join("\n"))
     end
-
-    return true
+    return name
   end
 
-  def del(id)
-    filename = id_to_filename(id)
+  def del(name)
+    filename = name_to_filename(name)
     filepath = File.join(@path, filename)
     unless File.exists?(filepath)
-      puts "no such ovpn file with id=#{id}"
+      puts "no such ovpn file with name=#{name}"
       return true
     end
     FileUtils.rm(filepath)
     return true
   end
 
-  def get(id)
-    filename = id_to_filename(id)
+  def get(name)
+    filename = name_to_filename(name)
     filepath = File.join(@path, filename)
     return nil unless File.exists?(filepath)
     data = _parse_ovpn_file(filepath) || {}
-    data[:id] = id
+    data[:name] = name
     return data
   end
 
@@ -101,8 +118,8 @@ class Ovpns
     f.close if f
   end
 
-  def id_to_filename(id)
-    "#{id}.ovpn"
+  def name_to_filename(name)
+    "#{name}.ovpn"
   end
 
 end

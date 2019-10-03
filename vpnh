@@ -112,8 +112,28 @@ elsif command =~ /^config set ([a-zA-Z0-9\-\._]+) (.+)/
 elsif command == 'auths flush'
   master.auths.flush
   puts "OK. all auths removed"
+elsif command =~ /^ovpns add ([a-zA-Z0-9\.\-_]+) (.+)$/
+  name = $1
+  path = $2
+  puts "name=#{name}"
+  puts "path=#{path}"
+  name = master.ovpns.add(path, name)
+  if name
+    puts "name=#{name}"
+  else
+    puts "ovpns add FAILED"
+  end
 elsif command =~ /^ovpns add (.+)$/
-  ok = master.ovpns.add($1)
+  path = $1
+  puts "path=#{path}"
+  name = master.ovpns.add(path)
+  if name
+    puts "name=#{name}"
+  else
+    puts "ovpns add FAILED"
+  end
+elsif command == 'ovpns flush'
+  ok = master.ovpns.flush
   puts "ok=#{ok}"
 elsif command =~ /^ovpns del (.+)$/
   ok = master.ovpns.del($1)
@@ -125,7 +145,7 @@ elsif command == 'ovpns all'
   else
     puts "failed to get ovpns"
   end
-elsif command =~ /^auths add (\w+) ([^\s]+) (.+)$/
+elsif command =~ /^auths add ([a-zA-Z0-9\.\-_]+) ([^\s]+) (.+)$/
   name = $1
   user = $2
   pass = $3
