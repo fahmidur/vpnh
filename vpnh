@@ -112,6 +112,19 @@ elsif command =~ /^config set ([a-zA-Z0-9\-\._]+) (.+)/
 elsif command == 'auths flush'
   master.auths.flush
   puts "OK. all auths removed"
+elsif command =~ /^ovpns add (.+)$/
+  ok = master.ovpns.add($1)
+  puts "ok=#{ok}"
+elsif command =~ /^ovpns del (.+)$/
+  ok = master.ovpns.del($1)
+  puts "ok=#{ok}"
+elsif command == 'ovpns all'
+  out = master.ovpns.all
+  if out
+    puts JSON.pretty_generate(out)
+  else
+    puts "failed to get ovpns"
+  end
 elsif command =~ /^auths add (\w+) ([^\s]+) (.+)$/
   name = $1
   user = $2

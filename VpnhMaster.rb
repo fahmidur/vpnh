@@ -31,7 +31,7 @@ class VpnhMaster
   end
 
   def ovpns
-    @ovpn ||= Ovpns.new(self, self.ovpn_bag_path)
+    @ovpns ||= Ovpns.new(self, self.ovpns_path)
   end
 
   def client
