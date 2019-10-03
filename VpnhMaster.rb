@@ -12,6 +12,31 @@ class VpnhMaster
 
   def initialize
     @config = VpnhConfig.new(con_path)
+    co_ensure
+  end
+
+  def version
+  end
+
+  def semver_read(path)
+    return [-1, -1, -1] unless File.exists(path)
+    IO.read(path).strip.split('.')[0..2].map*(&:to_i)
+  end
+
+  def co_ensure
+    if co_path == __dir__
+      puts "co_ensure. skipped. called from co"
+      return
+    end
+    Dir.mkdir_p(co_path) unless Dir.exists?(co_path)
+    co_version = semver_read(File.join(co_path, 'VERSION'))
+    my_version = semver_read(File.join(__dir__, 'VERSION'))
+    if co_version == my_version
+      puts "co_ensure. skipped. version is same"
+      return
+    end
+    puts "co_ensure. copy co from self"
+    FileUtils.cp_r(__dir__, co_path)
   end
 
   def config
@@ -115,6 +140,21 @@ class VpnhMaster
       errors.each {|err| puts "* #{err}" }
     end
     return errors.size > 0
+  end
+
+  def ovpn_up_path
+    return File.join(co_path, "ovpn_up")
+  end
+
+  def ovpn_down_path
+    return File.join(co_path, "ovpn_down")
+  end
+
+  def co_path
+    return @co_path if @co_path
+    path = File.join(@the_path, "co")
+    FileUtils.mkdir_p(path) unless Dir.exists?(path)
+    return (@co_path = path)
   end
 
   def ovpn_up(virt_iface, virt_iface_addr)

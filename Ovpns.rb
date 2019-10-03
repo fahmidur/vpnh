@@ -30,7 +30,33 @@ class Ovpns
     # ensure route-nopull
     # add the up/down scripts
     # add user/pass if provided
-    FileUtils.cp(filepath, new_filepath)
+    #FileUtils.cp(filepath, new_filepath)
+    File.open(filepath) do |f|
+      olines = []
+      inside_vpnh = false
+      f.each_line do |line|
+        line.chomp!
+        if line == '#vpnh{'
+          inside_vpnh = true
+          next
+        end
+        if line == '#vpnh}'
+          inside_vpnh = false
+          next
+        end
+        unless inside_vpnh
+          olines << line
+        end
+      end
+      # vpnh modifications
+      olines << '#vpnh{'
+      olines << 'route-nopull'
+      olines << "up #{master.ovpn_up_path}"
+      olines << "down #{master.ovpn_down_path}"
+      olines << '#vpnh}'
+      IO.write(new_filepath, olines.join("\n"))
+    end
+
     return true
   end
 
