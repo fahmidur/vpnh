@@ -109,6 +109,33 @@ elsif command =~ /^config set ([a-zA-Z0-9\-\._]+) (.+)/
   puts master.config.set(key, val)
   puts "---"
   config_show(master)
+elsif command =~ /^auths add (\w+) ([^\s]+) (.+)$/
+  name = $1
+  user = $2
+  pass = $3
+  puts "name=#{name}"
+  puts "user=#{user}"
+  puts "pass=#{pass}"
+  master.auths.add(user, pass, name)
+elsif command =~ /^auths add ([^\s]+) (.+)$/
+  user = $1
+  pass = $2
+  puts "user=#{user}"
+  puts "pass=#{pass}"
+  name = master.auths.add(user, pass)
+  puts "name=#{name}"
+elsif command =~ /^auths all$/
+  out = master.auths.all()
+  if out
+    puts JSON.pretty_generate(out.to_h)
+  else
+    puts "--- you have no auths"
+  end
+elsif command =~ /^auths del (\w+)$/
+  name = $1
+  puts "deleting auth with name=#{name}"
+  ok = master.auths.del(name)
+  puts "ok=#{ok}"
 elsif command =~ /^user_add (\w+)/
   puts Util.user_add($1)
 elsif command =~ /x (\w+)/

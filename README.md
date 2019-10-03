@@ -43,3 +43,8 @@ iptables -A OUTPUT -o eth0 -m owner --uid-owner vpnuser -j REJECT
 
 this prevents vpnuser from ever accessing eth0, meaning the tun0 vpn interface must be up for vpnuser to do anything, this is exactly what we want.
 
+---
+vpnh auths add expressvpn
+vpnh ovpns add /path/to/conf.ovpn auth expressvpn
+vpnh ovpns del <id>
+

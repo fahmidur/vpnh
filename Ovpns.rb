@@ -1,4 +1,4 @@
-class OvpnBag
+class Ovpns
   require 'fileutils'
   require 'securerandom'
   def initialize(master, path)
