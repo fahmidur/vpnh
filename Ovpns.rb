@@ -46,6 +46,7 @@ class Ovpns
     new_filepath = File.join(@path, new_filename)
     # TODO:
     # ensure route-nopull
+    # script-security
     # add the up/down scripts
     # add user/pass if provided
     #FileUtils.cp(filepath, new_filepath)
@@ -70,6 +71,7 @@ class Ovpns
       # vpnh modifications
       olines << '#vpnh{'
       olines << 'route-nopull'
+      olines << "script-security 3 system"
       olines << "up #{@master.co_ovpn_up_path}"
       olines << "down #{@master.co_ovpn_down_path}"
       olines << '#vpnh}'
