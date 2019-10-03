@@ -148,11 +148,11 @@ class VpnhMaster
   end
 
   def co_ovpn_up_path
-    return File.join(co_path, "ovpn_up")
+    return File.join(co_path, "vpnh_ovpn_up")
   end
 
   def co_ovpn_down_path
-    return File.join(co_path, "ovpn_down")
+    return File.join(co_path, "vpnh_ovpn_down")
   end
 
   def co_path
