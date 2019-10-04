@@ -256,7 +256,7 @@ class VpnhMaster
     errors << "expecting argument virt_iface" unless virt_iface
     errors << "expecting argument virt_iface_addr" unless virt_iface_addr
     return false if in_error?(errors)
-    File.rm_f(openvpn_pid_path) if File.exists?(openvpn_pid_path)
+    FileUtils.rm_f(openvpn_pid_path) if File.exists?(openvpn_pid_path)
     return true
   end
 
