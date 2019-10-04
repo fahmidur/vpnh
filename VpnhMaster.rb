@@ -12,7 +12,7 @@ class VpnhMaster
 
   def initialize
     @config = VpnhConfig.new(con_path)
-    co_ensure
+    #co_ensure
   end
 
   def semver_read(path)
