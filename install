@@ -16,7 +16,7 @@ def install_shellrc(filepath)
   end
   new_line = "export PATH=$PATH:#{$TCO_DIR} #VPNH_INSTALL"
   already_installed = false
-  f.open(filepath) do |f|
+  File.open(filepath) do |f|
     f.each_line do |line|
       line = line.strip
       if line == new_line
@@ -27,7 +27,7 @@ def install_shellrc(filepath)
     end
   end
   puts "install_shellrc. appending to PATH within #{filepath}..."
-  f.open(filepath, 'a') do |f|
+  File.open(filepath, 'a') do |f|
     f.puts(new_line)
   end
   puts "--- done"
