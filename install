@@ -4,6 +4,8 @@ require 'fileutils'
 
 $THE_DIR = '/var/opt/vpnh'
 $TCO_DIR = File.join($THE_DIR, 'co')
+$VPNH_PATH = File.join($TCO_DIR, 'vpnh')
+$VPNH_SERVICE_PATH = File.join($TCO_DIR, 'vpnh.service')
 
 def ensure_dir(path)
   FileUtils.mkdir_p(path) unless(path)
@@ -40,7 +42,19 @@ end
 puts "$THE_DIR = #{$THE_DIR}"
 puts "$TCO_DIR = #{$TCO_DIR}"
 
-# TODO stop the vpnh daemon if it exists
+if File.exists?($VPNH_PATH)
+  puts "found existing vpnh at #{$VPNH_PATH}"
+  puts "stopping vpnh manually..."
+  system("#{$VPNH_PATH} stop")
+  puts "--done"
+  if(`which systemctl`.strip) 
+    puts "installing vpnh systemd service..."
+    system("systemctl --force disable vpnh")
+    system("systemctl --force enable #{$VPNH_SERVICE_PATH}")
+    system("systemctl daemon-reload")
+    puts "--done"
+  end
+end
 
 ensure_dir($THE_DIR)
 if Dir.exist?($TCO_DIR)
