@@ -52,7 +52,7 @@ class VpnhMaster
 
   def openvpn_running?
     pid = openvpn_pid
-    return pid && Util.process_exists?(pid)
+    return !!(pid && Util.process_exists?(pid))
   end
 
   def _status_calc_connected(h)
