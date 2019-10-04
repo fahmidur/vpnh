@@ -37,6 +37,43 @@ class VpnhMaster
     return true
   end
 
+  def get_xip_real
+    addr = IpAddr.new(Util.run("curl ifconfig.me").out)
+    return nil unless addr.valid?
+    return addr
+  end
+
+  def get_xip_virt
+    addr = IpAddr.new(Util.run("sudo -u #{vpnh_user} curl ifconfig.me").out)
+    return nil unless addr.valid?
+    return addr
+  end
+
+  def openvpn_running?
+    pid = openvpn_pid
+    return pid && Util.process_exists?(pid)
+  end
+
+  def _status_calc_connected(h)
+    unless openvpn_running
+      h[:connected] = false
+      return
+    end
+    h[:xip_virt] = get_xip_virt unless h.has_key?(:xip_virt)
+    if h[:xip_real] && h[:xip_virt] && h[:xip_real] != h[:xip_virt]
+      h[:connected] = true
+    end
+    return h
+  end
+
+  def status
+    out = {}
+    out[:xip_real] = get_xip_real
+    out[:openvpn_running] = openvpn_running?
+    _status_calc_connected(out)
+    return out
+  end
+
   def connect(name)
     pid = openvpn_pid
     if pid && Util.process_exists?(pid)

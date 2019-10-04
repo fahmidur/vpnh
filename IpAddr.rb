@@ -56,4 +56,8 @@ class IpAddr
     bytes[-1] = num
     return (@dotmap[num] = IpAddr.new(bytes))
   end
+
+  def <=>(other)
+    return self.to_s <=> other.to_s
+  end
 end
