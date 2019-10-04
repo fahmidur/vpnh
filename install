@@ -47,13 +47,6 @@ if File.exists?($VPNH_PATH)
   puts "stopping vpnh manually..."
   system("#{$VPNH_PATH} stop")
   puts "--done"
-  if `which systemctl`.strip.size > 0
-    puts "installing vpnh systemd service..."
-    system("systemctl --force disable vpnh")
-    system("systemctl --force enable #{$VPNH_SERVICE_PATH}")
-    system("systemctl daemon-reload")
-    puts "--done"
-  end
 end
 
 ensure_dir($THE_DIR)
@@ -66,6 +59,14 @@ end
 puts "copying new checkout dir: #{$TCO_DIR}"
 FileUtils.cp_r(File.join(__dir__, '.'), $TCO_DIR)
 puts "--done"
+
+if `which systemctl`.strip.size > 0
+  puts "installing vpnh systemd service..."
+  system("systemctl --force disable vpnh")
+  system("systemctl --force enable #{$VPNH_SERVICE_PATH}")
+  system("systemctl daemon-reload")
+  puts "--done"
+end
 
 install_shellrc(File.join(ENV['HOME'], '.bashrc'))
 install_shellrc(File.join(ENV['HOME'], '.zshrc'))
