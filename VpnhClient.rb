@@ -16,6 +16,12 @@ class VpnhClient
     end
   end
 
+  def server_running?
+    connect
+    return false unless @server
+    return @server.running?
+  end
+
   def status
     connect
     return {

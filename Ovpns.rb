@@ -98,12 +98,19 @@ class Ovpns
   end
 
   def get(name)
-    filename = name_to_filename(name)
-    filepath = File.join(@path, filename)
-    return nil unless File.exists?(filepath)
+    filepath = get_path(name)
+    return nil unless filepath
     data = _parse_ovpn_file(filepath) || {}
     data[:name] = name
     return data
+  end
+
+  def get_path(name)
+    filename = name_to_filename(name)
+    return nil unless filename
+    filepath = File.join(@path, filename)
+    return nil unless File.exists?(filepath)
+    return filepath
   end
 
   def _parse_ovpn_file(filepath)

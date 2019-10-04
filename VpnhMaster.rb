@@ -15,6 +15,39 @@ class VpnhMaster
     #co_ensure
   end
 
+  def server_daemon_ensure
+    if client.server_running?
+      puts "server is already running"
+      return true
+    end
+    Util.daemonize do
+      self.server.ignition
+    end
+  end
+
+  def openvpn(name)
+    pid = openvpn_pid
+    if pid
+      puts "killing openvpn at pid=#{pid}"
+      Process.kill(15, pid)
+    end
+    ovpn_path = self.ovpns.get_path(name)
+    unless ovpn_path
+      puts "no such ovpn with name=#{name}"
+      return false
+    end
+    system("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
+  end
+
+  def openvpn_pid
+    return nil unless File.exists?(openvpn_pid_path)
+    return IO.read(openvpn_pid_path).strip.to_i
+  end
+
+  def openvpn_pid_path
+    @openvpn_pid_path ||= File.join(@path, 'openvpn.pid')
+  end
+
   def semver_read(path)
     return [-1, -1, -1] unless File.exists?(path)
     IO.read(path).strip.split('.')[0..2].map(&:to_i)

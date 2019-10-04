@@ -31,6 +31,10 @@ class VpnhServer
     DRb.stop_service
   end
 
+  def running?
+    return true
+  end
+
   def status
     return {
       :state => :running
