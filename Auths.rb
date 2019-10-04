@@ -73,6 +73,12 @@ class Auths
     return name
   end
 
+  def get_path(name)
+    data = self.get(name)
+    return nil unless data
+    return name_to_path(name)
+  end
+
   def name_to_path(name)
     File.join(@path, name)
   end

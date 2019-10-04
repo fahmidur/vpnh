@@ -32,7 +32,7 @@ class Ovpns
     return out
   end
 
-  def add(filepath, name=nil)
+  def add(filepath, name: nil, auth: nil)
     unless File.exists?(filepath)
       puts "ERROR: no such file at #{filepath}"
       return false
@@ -42,13 +42,13 @@ class Ovpns
       puts "ERROR: invalid name #{name}"
       return false
     end
+    auth_path = auth ? @master.auths.get_path(auth) : nil
+    if auth && !auth_path
+      puts "ERROR: unable to find auth_path from auth"
+      return false
+    end
     new_filename = name_to_filename(name)
     new_filepath = File.join(@path, new_filename)
-    # TODO:
-    # ensure route-nopull
-    # script-security
-    # add the up/down scripts
-    # add user/pass if provided
     #FileUtils.cp(filepath, new_filepath)
     olines = []
     file_open_success = false
@@ -74,6 +74,9 @@ class Ovpns
       olines << "script-security 3 system"
       olines << "up #{@master.co_ovpn_up_path}"
       olines << "down #{@master.co_ovpn_down_path}"
+      if auth_path
+        olines << "auth-user-pass #{auth_path}"
+      end
       olines << '#vpnh}'
       file_open_success = true
     end
@@ -113,6 +116,9 @@ class Ovpns
       if line =~ /remote (.+)/
         host, port = $1.split(' ')
         ret[:remote] = {:host => host, :port => port}
+      end
+      if line =~ /auth-user-pass (.+)$/
+        ret[:auth_user_pass] = $1.strip
       end
     end
     return ret
