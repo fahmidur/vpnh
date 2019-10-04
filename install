@@ -26,6 +26,7 @@ def install_shellrc(filepath)
       end
     end
   end
+  return true if already_installed
   puts "install_shellrc. appending to PATH within #{filepath}..."
   File.open(filepath, 'a') do |f|
     f.puts(new_line)
