@@ -11,7 +11,10 @@ class VpnhConfig
     else
       raise 'invalid conthing'
     end
-    @props = Set.new(['real_iface', 'vpnh_user', 'vpnh_tabl'])
+    @props = Set.new([
+      'real_iface', 'vpnh_user', 'vpnh_tabl', 
+      'ovpn_sel'
+    ])
     set_defaults!
     @errors = []
     validate!

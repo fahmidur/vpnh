@@ -28,7 +28,7 @@ class VpnhMaster
     self.server_daemon
   end
 
-  def openvpn_disconnect
+  def disconnect
     pid = openvpn_pid
     if pid && Util.process_exists?(pid)
       puts "killing openvpn at pid=#{pid}"
@@ -37,7 +37,7 @@ class VpnhMaster
     return true
   end
 
-  def openvpn_connect(name)
+  def connect(name)
     pid = openvpn_pid
     if pid && Util.process_exists?(pid)
       puts "ERROR: openvpn already connect at pid=#{pid}"
@@ -48,6 +48,7 @@ class VpnhMaster
       puts "no such ovpn with name=#{name}"
       return false
     end
+    @config.set('ovpn_sel', name)
     puts "openvpn. starting..."
     Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
   end
