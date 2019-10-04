@@ -45,8 +45,12 @@ end
 
 if command == 'server'
   master.server.ignition
-elsif command =~ /openvpn ([a-zA-Z0-9\.\-_]+)/
-  master.openvpn($1)
+elsif command =~ /openvpn connect ([a-zA-Z0-9\.\-_]+)/
+  name = $1
+  puts "name=#{name}"
+  master.openvpn_connect(name)
+elsif command == 'openvpn disconnect'
+  master.openvpn_disconnect()
 elsif command == 'server daemon'
   master.server_daemon_ensure
 elsif command == 'server shutdown' || command == 'server stop' || command == 'stop'

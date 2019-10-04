@@ -14,21 +14,34 @@ class VpnhMaster
     @config = VpnhConfig.new(con_path)
   end
 
-  def server_daemon_ensure
-    if client.server_running?
-      puts "server is already running"
-      return true
-    end
+  def server_daemon
     Util.daemonize do
       self.server.ignition
     end
   end
 
-  def openvpn(name)
+  def server_daemon_ensure
+    if client.server_running?
+      puts "server is already running"
+      return true
+    end
+    self.server_daemon
+  end
+
+  def openvpn_disconnect
     pid = openvpn_pid
-    if pid
+    if pid && Util.process_exists?(pid)
       puts "killing openvpn at pid=#{pid}"
       Process.kill(15, pid)
+    end
+    return true
+  end
+
+  def openvpn_connect(name)
+    pid = openvpn_pid
+    if pid && Util.process_exists?(pid)
+      puts "ERROR: openvpn already connect at pid=#{pid}"
+      return false
     end
     ovpn_path = self.ovpns.get_path(name)
     unless ovpn_path
@@ -243,6 +256,7 @@ class VpnhMaster
     errors << "expecting argument virt_iface" unless virt_iface
     errors << "expecting argument virt_iface_addr" unless virt_iface_addr
     return false if in_error?(errors)
+    File.rm_f(openvpn_pid_path) if File.exists?(openvpn_pid_path)
     return true
   end
 
