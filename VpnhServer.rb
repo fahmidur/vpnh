@@ -1,5 +1,6 @@
 class VpnhServer
   require 'drb'
+
   def initialize(master)
     @master = master
     @mainloop_go = true
