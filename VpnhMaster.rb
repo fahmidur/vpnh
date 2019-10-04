@@ -44,6 +44,7 @@ class VpnhMaster
   end
 
   def get_xip_virt
+    vpnh_user = @config.get(:vpnh_user)
     addr = IpAddr.new(Util.run("sudo -u #{vpnh_user} curl ifconfig.me").out)
     return nil unless addr.valid?
     return addr
