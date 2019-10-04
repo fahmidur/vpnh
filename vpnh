@@ -45,6 +45,8 @@ end
 
 if command == 'server'
   master.server.ignition
+elsif command == 'connect'
+  master.connect()
 elsif command =~ /connect ([a-zA-Z0-9\.\-_]+)/
   name = $1
   puts "name=#{name}"

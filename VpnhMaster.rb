@@ -76,10 +76,19 @@ class VpnhMaster
     return out
   end
 
-  def connect(name)
+  def connect(name=nil)
     pid = openvpn_pid
     if pid && Util.process_exists?(pid)
       puts "ERROR: openvpn already connect at pid=#{pid}"
+      return false
+    end
+    unless name
+      puts "getting last ovpn_sel"
+      name = @config.get(:ovpn_sel)
+      puts "fetched last ovpn_sel=#{name}" if name
+    end
+    unless name
+      puts "ERROR: ovpn name required"
       return false
     end
     ovpn_path = self.ovpns.get_path(name)
