@@ -66,9 +66,7 @@ class VpnhServer
         $logger.info "status=\n#{JSON.pretty_generate(st)}\n"
         if st[:connected]
           $logger.info "already connected"
-          next
-        end
-        if @master.auto_connectable?
+        elsif @master.auto_connectable?
           $logger.info "auto_connectable. connecting..."
           @master.connect
         end
