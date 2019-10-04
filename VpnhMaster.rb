@@ -77,6 +77,13 @@ class VpnhMaster
     return out
   end
 
+  def auto_connectable?
+    return !!(
+      @config.is_valid? &&
+      @config.get(:ovpn_sel)
+    )
+  end
+
   def connect(name=nil)
     pid = openvpn_pid
     if pid && Util.process_exists?(pid)

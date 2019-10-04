@@ -50,6 +50,10 @@ class VpnhServer
     Util.get_default_iface
   end
 
+  def config_update
+    @master.config.read_data
+  end
+
   private
   
   def mainloop
@@ -58,7 +62,17 @@ class VpnhServer
     @t1 = Thread.new {
       while(@mainloop_go)
         $logger.info "."
-        sleep 2
+        st = @master.status
+        $logger.info "status=\n#{JSON.pretty_generate(st)}\n"
+        if st[:connected]
+          $logger.info "already connected"
+          next
+        end
+        if @master.auto_connectable?
+          $logger.info "auto_connectable. connecting..."
+          @master.connect
+        end
+        sleep 5
       end
     }
     begin

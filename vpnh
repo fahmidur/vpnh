@@ -56,6 +56,8 @@ elsif command == 'disconnect'
 elsif command == 'server daemon'
   # run the server as a daemon unless it is already running
   master.server_daemon_ensure
+elsif command == 'server config update'
+  master.client.config_update
 elsif command == 'server shutdown' || command == 'server stop' || command == 'stop'
   puts 'telling the server to gracefully shutdown...'
   master.client.shutdown
@@ -114,6 +116,7 @@ elsif command =~ /^config set ([a-zA-Z0-9\-\._]+) (.+)/
     val = nil
   end
   puts master.config.set(key, val)
+  master.client.config_update
   puts "---"
   config_show(master)
 elsif command == 'auths flush'
