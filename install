@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+THE_DIR = '/var/opt/vpnh'
+TCO_DIR = File.join(THE_DIR, 'co')
+
+def ensure_dir(path)
+  FileUtils.mkdir_p(path) unless(path)
+end
+
+#--- MAIN
+
+puts "THE_DIR = #{THE_DIR}"
+puts "TCO_DIR = #{TCO_DIR}"
+
+# TODO stop the vpnh daemon if it exists
+
+ensure_dir(THE_DIR)
+if Dir.exist?(TCO_DIR)
+  puts "removing old checkout dir: #{TCO_DIR}"
+  FileUtils.rm_rf(TCO_DIR)
+  puts "--done"
+end
+
+puts "copying new checkout dir: #{TCO_DIR}"
+FileUtils.cp_r(File.join(__dir__, '.'), TCO_DIR)
+puts "--done"
