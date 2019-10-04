@@ -45,7 +45,7 @@ end
 
 if command == 'server'
   master.server.ignition
-if command =~ /openvpn ([a-zA-Z0-9\.\-_]+)/
+elsif command =~ /openvpn ([a-zA-Z0-9\.\-_]+)/
   ovpn_name = $1
   master.server_daemon_ensure
   master.openvpn($1)
