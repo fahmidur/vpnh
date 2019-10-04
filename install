@@ -47,7 +47,7 @@ if File.exists?($VPNH_PATH)
   puts "stopping vpnh manually..."
   system("#{$VPNH_PATH} stop")
   puts "--done"
-  if(`which systemctl`.strip) 
+  if `which systemctl`.strip.size > 0
     puts "installing vpnh systemd service..."
     system("systemctl --force disable vpnh")
     system("systemctl --force enable #{$VPNH_SERVICE_PATH}")
