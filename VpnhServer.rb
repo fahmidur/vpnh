@@ -70,7 +70,7 @@ class VpnhServer
           $logger.info "auto_connectable. connecting..."
           @master.connect
         end
-        sleep 5
+        sleep 15
       end
     }
     begin
