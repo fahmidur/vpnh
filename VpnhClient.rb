@@ -22,14 +22,6 @@ class VpnhClient
     return @server.running?
   end
 
-  def status
-    connect
-    return {
-      :state => :not_running
-    } unless @server
-    return @server.status
-  end
-
   private
 
   def connect

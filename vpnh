@@ -54,11 +54,12 @@ elsif command =~ /connect ([a-zA-Z0-9\.\-_]+)/
 elsif command == 'disconnect'
   master.disconnect()
 elsif command == 'server daemon'
+  # run the server as a daemon unless it is already running
   master.server_daemon_ensure
 elsif command == 'server shutdown' || command == 'server stop' || command == 'stop'
-  puts 'stopping vpnh server...'
+  puts 'telling the server to gracefully shutdown...'
   master.client.shutdown
-  puts 'stopping vpnh server... DONE'
+  puts '--done'
 elsif command == 'status'
   puts JSON.pretty_generate(master.status)
 elsif command == 'running_server_pid'
@@ -101,7 +102,7 @@ elsif command == 'get_all_users'
   puts Util.get_all_users.to_a.to_json
 elsif command =~ /^user_exists\? (.+)/
   puts Util.user_exists?($1)
-elsif command == 'config show' || command == 'config get'
+elsif command == 'config show' || command == 'config get' || command == 'config'
   config_show(master)
 elsif command =~ /^config get (.+)/
   key = $1.strip
@@ -125,15 +126,13 @@ elsif command =~ /^ovpns add name=([a-zA-Z0-9\.\-_]+) auth=([a-zA-Z0-9\.\-_]+) (
   puts "name=#{name}"
   puts "auth=#{auth}"
   puts "path=#{path}"
-  name = master.ovpns.add(
+  out = master.ovpns.add(
     path, 
     name: name,
     auth: auth,
   )
-  if name
-    puts "name=#{name}"
-  else
-    puts "ovpns add FAILED"
+  unless out
+    puts "ERROR: failed to add to ovpns"
   end
 elsif command =~ /^ovpns add ([a-zA-Z0-9\.\-_]+) (\S+)$/
   name = $1
@@ -169,7 +168,7 @@ elsif command == 'ovpns all' || command == 'ovpns show'
   if out
     puts JSON.pretty_generate(out)
   else
-    puts "failed to get ovpns"
+    puts "ERROR: failed to fetch ovpns"
   end
 elsif command =~ /^auths add ([a-zA-Z0-9\.\-_]+) ([^\s]+) (.+)$/
   name = $1
@@ -191,7 +190,7 @@ elsif command == 'auths all' || command == 'auths show'
   if out
     puts JSON.pretty_generate(out.to_h)
   else
-    puts "--- you have no auths"
+    puts "ERROR: failed to fetch auths"
   end
 elsif command =~ /^auths del (\w+)$/
   name = $1
@@ -201,8 +200,9 @@ elsif command =~ /^auths del (\w+)$/
 elsif command =~ /^user_add (\w+)/
   puts Util.user_add($1)
 elsif command =~ /x (\w+)/
+  # for experimentation only
   out = master.client.public_send($1)
-  puts out if out
+  p out if out
 else
   die_with_usage
 end

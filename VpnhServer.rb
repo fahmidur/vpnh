@@ -36,12 +36,6 @@ class VpnhServer
     return true
   end
 
-  def status
-    return {
-      :state => :running
-    }
-  end
-
   def time
     return Time.now
   end
