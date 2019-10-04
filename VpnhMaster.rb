@@ -55,7 +55,7 @@ class VpnhMaster
   end
 
   def _status_calc_connected(h)
-    h[:openvpn_running] = openvpn_running? unless h.has_key(:openvpn_running)
+    h[:openvpn_running] = openvpn_running? unless h.has_key?(:openvpn_running)
     unless h[:openvpn_running]
       h[:connected] = false
       return
