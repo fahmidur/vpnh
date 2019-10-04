@@ -45,7 +45,7 @@ class VpnhMaster
   end
 
   def openvpn_pid_path
-    @openvpn_pid_path ||= File.join(@path, 'openvpn.pid')
+    @openvpn_pid_path ||= File.join(@the_path, 'openvpn.pid')
   end
 
   def semver_read(path)
