@@ -36,6 +36,7 @@ class VpnhMaster
       puts "no such ovpn with name=#{name}"
       return false
     end
+    puts "openvpn. starting..."
     Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
   end
 
