@@ -1,0 +1,18 @@
+[Unit]
+Description=vpnh daemon
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+
+ExecStart=/var/opt/vpnh/co/vpnh server
+
+Restart=on-failure
+
+# Configures the time to wait before service is stopped forcefully.
+TimeoutStopSec=300
+
+[Install]
+WantedBy=multi-user.target
