@@ -71,6 +71,7 @@ class VpnhMaster
   def status
     out = {}
     out[:xip_real] = get_xip_real
+    out[:xip_virt] = get_xip_virt
     out[:openvpn_running] = openvpn_running?
     _status_calc_connected(out)
     return out
