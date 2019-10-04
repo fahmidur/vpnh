@@ -2,27 +2,55 @@
 
 require 'fileutils'
 
-THE_DIR = '/var/opt/vpnh'
-TCO_DIR = File.join(THE_DIR, 'co')
+$THE_DIR = '/var/opt/vpnh'
+$TCO_DIR = File.join($THE_DIR, 'co')
 
 def ensure_dir(path)
   FileUtils.mkdir_p(path) unless(path)
 end
 
+def install_shellrc(filepath)
+  unless File.exists?(filepath)
+    puts "install_shellrc. no such file at #{filepath}"
+    return false
+  end
+  new_line = "export PATH=$PATH:#{$TCO_DIR} #VPNH_INSTALL"
+  already_installed = false
+  f.open(filepath) do |f|
+    f.each_line do |line|
+      line = line.strip
+      if line == new_line
+        puts "install_shellrc. already installed. --SKIPPED"
+        already_installed = true
+        break
+      end
+    end
+  end
+  puts "install_shellrc. appending to PATH within #{filepath}..."
+  f.open(filepath, 'a') do |f|
+    f.puts(new_line)
+  end
+  puts "--- done"
+  return true
+end
+
 #--- MAIN
 
-puts "THE_DIR = #{THE_DIR}"
-puts "TCO_DIR = #{TCO_DIR}"
+puts "$THE_DIR = #{$THE_DIR}"
+puts "$TCO_DIR = #{$TCO_DIR}"
 
 # TODO stop the vpnh daemon if it exists
 
-ensure_dir(THE_DIR)
-if Dir.exist?(TCO_DIR)
-  puts "removing old checkout dir: #{TCO_DIR}"
-  FileUtils.rm_rf(TCO_DIR)
+ensure_dir($THE_DIR)
+if Dir.exist?($TCO_DIR)
+  puts "removing old checkout dir: #{$TCO_DIR}"
+  FileUtils.rm_rf($TCO_DIR)
   puts "--done"
 end
 
-puts "copying new checkout dir: #{TCO_DIR}"
-FileUtils.cp_r(File.join(__dir__, '.'), TCO_DIR)
+puts "copying new checkout dir: #{$TCO_DIR}"
+FileUtils.cp_r(File.join(__dir__, '.'), $TCO_DIR)
 puts "--done"
+
+install_shellrc(File.join(ENV['HOME'], '.bashrc'))
+install_shellrc(File.join(ENV['HOME'], '.zshrc'))
