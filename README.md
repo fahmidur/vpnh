@@ -149,22 +149,6 @@ Check the status of your connection with:
 vpnh status
 ```
 
-## Debugging
-
-The install script installed a systemd service named `vpnh`.
-
-Get daemon status:
-```
-systemctl status vpnh
-```
-
-Watch the logs:
-```
-journalctl -fu vpnh
-```
-
-See systemctl and journalctl usage for more information.
-
 ## IPv6 Notes
 
 Many VPN providers do not properly handle IPv6 which can result in
@@ -194,3 +178,18 @@ Not having an open port greatly limits the number of peers to which you can conn
 
 With Port Forwarding you can host a server, host a LAN party, and many other things.
 
+## Debugging
+
+The install script installed a systemd service named `vpnh`.
+
+Get daemon status:
+```
+systemctl status vpnh
+```
+
+Watch the logs:
+```
+journalctl -fu vpnh
+```
+
+See systemctl and journalctl usage for more information.
