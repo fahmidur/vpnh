@@ -83,6 +83,11 @@ Delete an auth:
 vpnh auths del <name>
 ```
 
+Delete all auths:
+```
+vpnh auths flush
+```
+
 ### Manage OpenVPN Config Files -- "ovpns"
 
 Show all ovpns known to vpnh:
