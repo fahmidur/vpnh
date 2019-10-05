@@ -37,6 +37,9 @@ without the involvement of proxy servers.
 
 ## Usage
 
+The usage is broken down into a number of sections.
+All commands below are expected to be run as root.
+
 ### Configuring
 
 Show current configuration:
