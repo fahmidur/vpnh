@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+sudo add-apt-repository ppa:deluge-team/stable
+sudo apt-get update
+sudo apt-get install deluged deluge-web deluge-console
+
+systemctl --force disable deluge
+systemctl --force enable ./deluge.service
+
+systemctl --force disable deluge-web
+systemctl --force enable ./deluge-web.service
