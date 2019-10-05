@@ -66,6 +66,7 @@ if `which systemctl`.strip.size > 0
   system("systemctl --force enable #{$VPNH_SERVICE_PATH}")
   system("systemctl daemon-reload")
   puts "--done"
+  system("systemctl start vpnh")
 end
 
 install_shellrc(File.join(ENV['HOME'], '.bashrc'))
