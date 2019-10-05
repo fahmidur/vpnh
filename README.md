@@ -171,7 +171,7 @@ In most cases it is recommended to disable IPv6 entirely with:
 sysctl -w net.ipv6.conf.all.disable_ipv6=1
 ```
 
-The website [https://ipleak.net](ipleak.net) is useful for testing leaks.
+The website [ipleak.net](https://ipleak.net) is useful for testing leaks.
 
 ## Recommended VPN Providers
 
