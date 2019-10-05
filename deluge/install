@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
 deluge_ppa="deluge-team/stable"
 if ! grep -q "^deb .*$deluge_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
   echo "adding ppa $deluge_ppa"
   sudo add-apt-repository ppa:deluge-team/stable -y
 fi
+
 sudo apt-get update
 sudo apt-get install -y deluged deluge-web deluge-console
 
 systemctl --force disable deluge
-systemctl --force enable ./deluge.service
+systemctl --force enable "$SCRIPTPATH/deluge.service"
 
 systemctl --force disable deluge-web
-systemctl --force enable ./deluge-web.service
+systemctl --force enable "$SCRIPTPATH/deluge-web.service"
