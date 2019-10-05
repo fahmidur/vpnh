@@ -16,3 +16,11 @@ systemctl --force enable "$SCRIPTPATH/deluged.service"
 
 systemctl --force disable deluge-web
 systemctl --force enable "$SCRIPTPATH/deluge-web.service"
+
+systemctl enable deluged
+systemctl enable deluge-web
+
+systemctl start deluged
+sleep 2
+systemctl start deluge-web
+
