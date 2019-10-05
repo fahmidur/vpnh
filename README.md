@@ -123,8 +123,7 @@ If your VPN provider requires you to login, you must create an auth
 and add your ovpn file using variant-2 of the `vpnh ovpns add ...`
 command.
 
-Some VPN providers like AirVPN give you a ovpn file containing a key which does not require
-you to login, in which case, 
+Some VPN providers like AirVPN give you an ovpn file containing a key which does not require you to login, in which case
 simply add the ovpn using the smaller variant-1 of the `vpnh ovpns add ...` command.
 
 ### Connecting / Disconnecting / Status
