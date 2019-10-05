@@ -36,7 +36,7 @@ There are many cases where having some programs under the vpn
 and some outside the vpn proves to be very useful.
 
 In example, one might want their BitTorrent client to be under the
-VPN while allowing some media-server program like Plex or Fezly to be on the regular network. 
+VPN while allowing some media-server program like [Plex](https://plex.tv) or [Fezly](https://fezly.co) to be on the regular network. 
 This allows your torrent traffic to be hidden from the prying eyes of your ISP and 
 still lets you consume the downloaded content locally within your network. 
 When media-server programs like Plex or Fezly are able to connect to your local network, you are able to reach your content directly
