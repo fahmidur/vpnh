@@ -124,22 +124,32 @@ simply add the ovpn using the smaller variant-1 of the `vpnh ovpns add ...` comm
 Once your ovpns and auths are properly setup.
 
 Connect with:
-`vpnh connect <name_of_ovpn>`
+```
+vpnh connect <name_of_ovpn>
+```
 
 Disconnect with:
-`vpnh disconnect <name_of_ovpn>`
+```
+vpnh disconnect <name_of_ovpn>
+```
 
 Check the status of your connection with:
-`vpnh status`
+```
+vpnh status
+```
 
 ## Debugging
 
 The install script installed a systemd service named `vpnh`.
 
 Get daemon status:
-`systemctl status vpnh`
+```
+systemctl status vpnh
+```
 
 Watch the logs:
-`journalctl -fu vpnh`
+```
+journalctl -fu vpnh
+```
 
 See systemctl and journalctl usage for more information.
