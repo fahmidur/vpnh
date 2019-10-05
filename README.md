@@ -153,3 +153,31 @@ journalctl -fu vpnh
 ```
 
 See systemctl and journalctl usage for more information.
+
+## IPv6 Notes
+
+Many VPN providers do not properly handle IPv6 which can result
+leaks. Test for leaks using `ipleak.net`.
+In most cases it is recommended to disable IPv6 entirely with:
+
+```
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+```
+
+## Recommended VPN Providers
+
+There are many good VPN providers. 
+I have tried the following popular offerrings:
+
+* NordVPN -- Plenty of servers but no Port Forwarding option.
+* ExpressVPN -- Pretty fast and reliable but no Port Forwarding option.
+* AirVPN -- Good, fast, and great Port Fowarding option.
+
+I recommend AirVPN thus far primarily because they offer Port Forwarding.
+
+Why is Port Forwarding important? If you are for example running a BitTorrent
+client, without an open port other peers cannot easily connect to you.
+Not having an open port greatly limits the number of peers to which you can connect.
+
+With Port Forwarding you can host a server, host a LAN party, and many other things.
+
