@@ -8,7 +8,7 @@ Type=simple
 User=root
 Group=root
 
-ExecStart=/usr/bin/deluge-web
+ExecStart=/usr/bin/deluge-web -d
 
 Restart=on-failure
 
