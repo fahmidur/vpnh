@@ -75,6 +75,7 @@ class VpnhMaster
     out[:xip_virt] = get_xip_virt
     out[:openvpn_running] = openvpn_running?
     _status_calc_connected(out)
+    out[:autoconnect] = @config.get(:autoconnect)
     return out
   end
 
