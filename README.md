@@ -11,9 +11,13 @@ Once connected vpnh will ensure that you remain connected.
 
 The name of vpnh_user and other settings are configurable via the `vpnh config ...` set of commands.
 
+*WARNING*: This project is a work in progress, while it does work,
+the documentation is incomplete, the commands are subject to change, tests need to be written, and much more. Please use at your own discretion.
+
 ## Requirements
 * Linux Kernel >= 4.10
 * Ubuntu >= 18.04
+* Ruby
 
 ## Installation
 
