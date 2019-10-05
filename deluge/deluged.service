@@ -6,6 +6,7 @@ After=network-online.target
 Type=simple
 User=vpnh_user
 Group=vpnh_user
+UMask=007
 
 ExecStart=/usr/bin/deluged -d
 
