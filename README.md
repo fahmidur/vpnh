@@ -137,7 +137,7 @@ vpnh connect <name_of_ovpn>
 
 Disconnect with:
 ```
-vpnh disconnect <name_of_ovpn>
+vpnh disconnect
 ```
 
 Check the status of your connection with:
