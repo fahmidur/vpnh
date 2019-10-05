@@ -37,7 +37,22 @@ def install_shellrc(filepath)
   return true
 end
 
+def package_install(name)
+  puts "package_install. installing #{name} ..."
+  system("apt-get install #{name}")
+end
+
+def package_ensure(name)
+  if `which #{name}`.strip.size > 0
+    puts "package_ensure. #{name} already installed"
+    return true
+  end
+  package_install(name)
+end
+
 #--- MAIN
+
+package_ensure('curl')
 
 puts "$THE_DIR = #{$THE_DIR}"
 puts "$TCO_DIR = #{$TCO_DIR}"
@@ -65,9 +80,12 @@ if `which systemctl`.strip.size > 0
   system("systemctl --force disable vpnh")
   system("systemctl --force enable #{$VPNH_SERVICE_PATH}")
   system("systemctl daemon-reload")
-  puts "--done"
+  puts "starting vpnh daemon..."
   system("systemctl start vpnh")
+  puts "--done"
 end
 
 install_shellrc(File.join(ENV['HOME'], '.bashrc'))
 install_shellrc(File.join(ENV['HOME'], '.zshrc'))
+
+puts "--done. installation complete."
