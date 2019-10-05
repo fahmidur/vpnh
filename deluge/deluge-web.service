@@ -5,8 +5,8 @@ After=network-online.target
 [Service]
 Type=simple
 
-User=vpnh_user
-Group=vpnh_user
+User=root
+Group=root
 
 ExecStart=/usr/bin/deluge-web
 
