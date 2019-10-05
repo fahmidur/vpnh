@@ -24,3 +24,4 @@ systemctl start deluged
 sleep 2
 systemctl start deluge-web
 
+systemctl daemon-reload
