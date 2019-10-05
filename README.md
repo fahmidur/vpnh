@@ -11,6 +11,9 @@ Once connected vpnh will ensure that you remain connected.
 
 The name of vpnh_user and other settings are configurable via the `vpnh config ...` set of commands.
 
+The vpnh user is intentionally created such that when the VPN is disconnected/down the user has no access to the real interface.
+This is to prevent any accidental leaks from programs you may be running under the vpnh user.
+
 **WARNING**: This project is a work in progress, while it does work,
 the documentation is incomplete, the commands are subject to change, tests need to be written, and much more. Please use at your own discretion.
 
