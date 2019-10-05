@@ -159,13 +159,15 @@ See systemctl and journalctl usage for more information.
 
 ## IPv6 Notes
 
-Many VPN providers do not properly handle IPv6 which can result
-leaks. Test for leaks using `ipleak.net`.
-In most cases it is recommended to disable IPv6 entirely with:
+Many VPN providers do not properly handle IPv6 which can result in
+leaks. 
 
+In most cases it is recommended to disable IPv6 entirely with:
 ```
 sysctl -w net.ipv6.conf.all.disable_ipv6=1
 ```
+
+The website [ipleak.net](ipleak.net) is useful for testing leaks.
 
 ## Recommended VPN Providers
 
