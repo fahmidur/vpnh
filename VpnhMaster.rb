@@ -34,6 +34,7 @@ class VpnhMaster
       puts "killing openvpn at pid=#{pid}"
       Process.kill(15, pid)
     end
+    @config.set(:autoconnect, false)
     return true
   end
 
@@ -80,6 +81,7 @@ class VpnhMaster
   def auto_connectable?
     return !!(
       @config.is_valid? &&
+      @config.get(:autoconnect) &&
       @config.get(:ovpn_sel)
     )
   end
@@ -104,7 +106,8 @@ class VpnhMaster
       puts "no such ovpn with name=#{name}"
       return false
     end
-    @config.set('ovpn_sel', name)
+    @config.set(:autoconnect, true)
+    @config.set(:ovpn_sel, name)
     puts "openvpn. starting..."
     Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
   end

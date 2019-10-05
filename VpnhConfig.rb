@@ -13,7 +13,8 @@ class VpnhConfig
     end
     @props = Set.new([
       'real_iface', 'vpnh_user', 'vpnh_tabl', 
-      'ovpn_sel'
+      'autoconnect',
+      'ovpn_sel',
     ])
     set_defaults!
     @errors = []
