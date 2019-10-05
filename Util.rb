@@ -43,7 +43,9 @@ module Util
   end
 
   def self.which(prog_name)
-    Command.new("which #{prog_name}").out
+    com = Command.new("which #{prog_name}")
+    return nil unless com.out.size > 0
+    return com.out
   end
 
   def self.ip_rule_del_m(table_name)
