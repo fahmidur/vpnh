@@ -53,6 +53,7 @@ end
 #--- MAIN
 
 package_ensure('curl')
+package_ensure('openvpn')
 
 puts "$THE_DIR = #{$THE_DIR}"
 puts "$TCO_DIR = #{$TCO_DIR}"
