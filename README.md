@@ -18,7 +18,7 @@ This is to prevent any accidental leaks from programs you may be running under t
 the documentation is incomplete, the commands are subject to change, tests need to be written, and much more. Please use at your own discretion.
 
 ## Requirements
-* Linux Kernel >= 4.10
+* Linux Kernel >= [4.10](https://kernelnewbies.org/Linux_4.10)
 * Ubuntu >= 18.04
 * Ruby
 
