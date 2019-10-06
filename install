@@ -39,7 +39,7 @@ end
 
 def package_install(name)
   puts "package_install. installing #{name} ..."
-  system("apt-get install #{name}")
+  system("apt-get install -y #{name}")
 end
 
 def package_ensure(name)
