@@ -217,7 +217,9 @@ module Util
   end
 
   def self.get_machine_id
-    IO.read('/etc/machine-id').strip
+    path = '/etc/machine-id'
+    return nil unless File.exists?(path)
+    return IO.read(path).strip
   end
 
   def self.sys_write_ok?
