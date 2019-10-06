@@ -107,10 +107,13 @@ class VpnhMaster
       puts "no such ovpn with name=#{name}"
       return false
     end
+    # TODO lock_acquire
     @config.set(:autoconnect, true)
     @config.set(:ovpn_sel, name)
     puts "openvpn. starting..."
-    Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
+    com = Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
+    # TODO lock_release
+    return com.success?
   end
 
   def openvpn_pid

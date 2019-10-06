@@ -95,9 +95,7 @@ module Util
   end
 
   def self.run(command)
-    com = Command.new(command)
-    puts com.stdout if com.stdout_present?
-    return com
+    return Command.new(command)
   end
 
   def self.ami_root?
