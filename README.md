@@ -169,7 +169,8 @@ as non-vpn-user may then make DNS requests through your real
 interface, resulting in a DNS leak.
 
 Set your DNS server to something public like Google's
-8.8.8.8 / 8.8.4.4 or Cloudflare's 1.1.1.1.
+8.8.8.8 / 8.8.4.4 or Cloudflare's 1.1.1.1. 
+You can also use whatever DNS server is preferred by your VPN provider.
 
 Use this to see which DNS server you are using:
 ```
