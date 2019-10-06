@@ -152,7 +152,44 @@ Check the status of your connection with:
 vpnh status
 ```
 
-## IPv6 Notes
+## Leaks
+
+Testing for leaks is very important.
+
+The website [ipleak.net](https://ipleak.net) is useful for testing leaks. 
+You can also get some results via:
+```
+curl ipleak.net/json/
+```
+### DNS Leaks
+
+Ensure that you are making DNS requests through the VPN interface
+and not through some local server. A local DNS server running
+as non-vpnuser may then make DNS requests through your real
+interface, resulting in a DNS leak.
+
+Set your DNS server to something public like Google's
+8.8.8.8 / 8.8.4.4 or Cloudflare's 1.1.1.1.
+
+Use this to see which DNS server you are using:
+```
+dig <any_public_domain>
+```
+and
+```
+cat /etc/resolv.conf
+```
+
+You may use the following to see which interface your DNS request goes through.
+```
+ip route get <dns_server_ip>
+```
+and
+```
+traceroute <dns_server_ip>
+```
+
+### IPv6 Leaks
 
 Many VPN providers do not properly handle IPv6 which can result in
 leaks. 
@@ -161,8 +198,6 @@ In most cases it is recommended to disable IPv6 entirely with:
 ```
 sysctl -w net.ipv6.conf.all.disable_ipv6=1
 ```
-
-The website [ipleak.net](https://ipleak.net) is useful for testing leaks.
 
 ## Recommended VPN Providers
 
