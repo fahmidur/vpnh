@@ -149,7 +149,7 @@ elsif command =~ /^ovpns add ([a-zA-Z0-9\.\-_]+) (\S+)$/
   if name
     puts "name=#{name}"
   else
-    puts "ovpns add FAILED"
+    puts "ERROR: failed to add to ovpns"
   end
 elsif command =~ /^ovpns add (\S+)$/
   path = $1
@@ -158,13 +158,15 @@ elsif command =~ /^ovpns add (\S+)$/
   if name
     puts "name=#{name}"
   else
-    puts "ovpns add FAILED"
+    puts "ERROR: failed to add to ovpns"
   end
 elsif command == 'ovpns flush'
   ok = master.ovpns.flush
   puts "ok=#{ok}"
 elsif command =~ /^ovpns del (.+)$/
-  ok = master.ovpns.del($1)
+  name = $1
+  puts "ovpns del. name=|#{name}|"
+  ok = master.ovpns.del(name)
   puts "ok=#{ok}"
 elsif command == 'ovpns all' || command == 'ovpns show' || command == 'ovpns'
   out = master.ovpns.all
@@ -197,7 +199,7 @@ elsif command == 'auths all' || command == 'auths show' || command == 'auths'
   end
 elsif command =~ /^auths del (\w+)$/
   name = $1
-  puts "deleting auth with name=#{name}"
+  puts "auths del. name=|#{name}|"
   ok = master.auths.del(name)
   puts "ok=#{ok}"
 elsif command =~ /^user_add (\w+)/
