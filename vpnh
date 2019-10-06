@@ -166,7 +166,7 @@ elsif command == 'ovpns flush'
 elsif command =~ /^ovpns del (.+)$/
   ok = master.ovpns.del($1)
   puts "ok=#{ok}"
-elsif command == 'ovpns all' || command == 'ovpns show'
+elsif command == 'ovpns all' || command == 'ovpns show' || command == 'ovpns'
   out = master.ovpns.all
   if out
     puts JSON.pretty_generate(out)
@@ -188,7 +188,7 @@ elsif command =~ /^auths add ([^\s]+) (.+)$/
   puts "pass=#{pass}"
   name = master.auths.add(user, pass)
   puts "name=#{name}"
-elsif command == 'auths all' || command == 'auths show'
+elsif command == 'auths all' || command == 'auths show' || command == 'auths'
   out = master.auths.all()
   if out
     puts JSON.pretty_generate(out.to_h)
