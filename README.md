@@ -1,6 +1,6 @@
 # vpnh - A VPN Helper
 
-This is a daemon to help you do vpn _split-tunneling_ on Linux/Ubuntu. 
+This is a daemon to help you do vpn [**split-tunneling**](https://en.wikipedia.org/wiki/Split_tunneling) on Linux/Ubuntu. 
 It is primarily a wrapper around the OpenVPN client.
 
 With vpnh you can add a number of openvpn config files and connect to any of them. 
@@ -165,7 +165,7 @@ curl ipleak.net/json/
 
 Ensure that you are making DNS requests through the VPN interface
 and not through some local server. A local DNS server running
-as non-vpnuser may then make DNS requests through your real
+as non-vpn-user may then make DNS requests through your real
 interface, resulting in a DNS leak.
 
 Set your DNS server to something public like Google's
