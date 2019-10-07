@@ -93,7 +93,7 @@ class VpnhConfig
   end
 
   def autoconnect=(bool)
-    @config.set(:autoconnect, _fix_bool(bool))
+    @confile.set(:autoconnect, _fix_bool(bool))
   end
 
   def real_iface=(val)
