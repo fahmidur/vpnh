@@ -128,7 +128,7 @@ class VpnhMaster
   end
 
   def openvpn_prelock_path
-    @openvpn_prelock_path ||= File.join(@the_path, 'openvpn_prelock')
+    @openvpn_prelock_path ||= File.join(the_path, 'openvpn_prelock')
   end
   def openvpn_prelocked?
     File.exists?(openvpn_prelock_path)
@@ -146,7 +146,7 @@ class VpnhMaster
   end
 
   def openvpn_pid_path
-    @openvpn_pid_path ||= File.join(@the_path, 'openvpn.pid')
+    @openvpn_pid_path ||= File.join(the_path, 'openvpn.pid')
   end
 
   def semver_read(path)
@@ -181,9 +181,7 @@ class VpnhMaster
   def the_path
     return @the_path if @the_path
     @the_path = '/var/opt/vpnh'
-    unless Dir.exists?(@the_path)
-      FileUtils.mkdir(@the_path)
-    end
+    Util.dir_ensure(@the_path)
     return @the_path
   end
 
@@ -267,7 +265,7 @@ class VpnhMaster
 
   def co_path
     return @co_path if @co_path
-    path = File.join(@the_path, "co")
+    path = File.join(the_path, "co")
     FileUtils.mkdir_p(path) unless Dir.exists?(path)
     return (@co_path = path)
   end
