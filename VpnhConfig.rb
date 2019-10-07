@@ -93,6 +93,7 @@ class VpnhConfig
   end
 
   def autoconnect=(bool)
+    puts "autconnect=. bool=#{bool}(#{bool.class})"
     @confile.set(:autoconnect, _fix_bool(bool))
   end
 
