@@ -155,7 +155,7 @@ class VpnhMaster
   end
 
   def auths_path
-    @auths_path ||= File.join(@the_path, 'auths')
+    @auths_path ||= File.join(the_path, 'auths')
   end
 
   def auths
@@ -163,7 +163,7 @@ class VpnhMaster
   end
 
   def ovpns_path
-    @ovpns_path ||= File.join(@the_path, 'ovpns')
+    @ovpns_path ||= File.join(the_path, 'ovpns')
   end
 
   def ovpns
