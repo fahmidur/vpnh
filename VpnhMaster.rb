@@ -90,7 +90,7 @@ class VpnhMaster
   def connect(name=nil)
     pid = openvpn_pid
     if pid && Util.process_exists?(pid)
-      puts "ERROR: openvpn already connect at pid=#{pid}"
+      puts "ERROR: openvpn already running at pid=#{pid}"
       return false
     end
     unless name
@@ -107,13 +107,30 @@ class VpnhMaster
       puts "no such ovpn with name=#{name}"
       return false
     end
-    # TODO lock_acquire
+    if openvpn_prelocked?
+      puts "ERROR: openvpn_prelocked. another openvpn-start is taking place"
+      return false
+    end
+    openvpn_prelock_acquire
     @config.set(:autoconnect, true)
     @config.set(:ovpn_sel, name)
     puts "openvpn. starting..."
     com = Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
-    # TODO lock_release
+    openvpn_prelock_release
     return com.success?
+  end
+
+  def openvpn_prelock_path
+    @openvpn_prelock_path ||= File.join(@the_path, 'openvpn_prelock')
+  end
+  def openvpn_prelocked?
+    File.exists?(openvpn_prelock_path)
+  end
+  def openvpn_prelock_acquire
+    FileUtils.rm(openvpn_prelock_path)
+  end
+  def openvpn_prelock_release
+    FileUtils.rm(openvpn_prelock_path)
   end
 
   def openvpn_pid
