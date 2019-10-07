@@ -36,15 +36,21 @@ end
 
 def package_install(name)
   puts "package_install. installing #{name} ..."
-  system("apt-get install -y #{name}")
+  if which("apt-get")
+    puts "packag_install. found apt-get"
+    Util.run("apt-get install -y #{name}")
+    return true
+  end
+  puts "package_install. unable to find package-manger"
+  return false
 end
 
 def package_ensure(name)
-  if `which #{name}`.strip.size > 0
+  if Util.which(name)
     puts "package_ensure. #{name} already installed"
     return true
   end
-  package_install(name)
+  return package_install(name)
 end
 
 #--- MAIN
