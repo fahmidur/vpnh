@@ -3,9 +3,9 @@
 require 'fileutils'
 require_relative 'Util'
 
-$THE_DIR = '/var/opt/vpnh'
-$TCO_DIR = File.join($THE_DIR, 'co')
-$VPNH_PATH = File.join($TCO_DIR, 'vpnh')
+$THE_DIR           = '/var/opt/vpnh'
+$TCO_DIR           = File.join($THE_DIR, 'co')
+$VPNH_PATH         = File.join($TCO_DIR, 'vpnh')
 $VPNH_SERVICE_PATH = File.join($TCO_DIR, 'vpnh.service')
 
 def shellrc_path_add(shellrc_path, path_item)

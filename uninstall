@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
 
 require_relative 'Util'
+require_relative 'Installer'
 
+Installer.uninstall
