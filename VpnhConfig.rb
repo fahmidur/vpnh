@@ -24,7 +24,7 @@ class VpnhConfig
   def default!
     @confile.data_write_lock_acquire
     self.real_iface_default!
-    @confile.set(:autoconnect, (@confile.get(:autoconnect)||false))
+    self.autoconnect = false
     @confile.data_write_lock_release
     @confile.data_write_if_changed
   end
@@ -92,6 +92,10 @@ class VpnhConfig
     @props.member?(key.to_s)
   end
 
+  def autoconnect=(bool)
+    @config.set(:autoconnect, _fix_bool(bool))
+  end
+
   def real_iface=(val)
     return real_iface_default! unless val
     all_ifaces = Util.get_all_ifaces
@@ -113,6 +117,16 @@ class VpnhConfig
     @confile.set(:real_iface, default_iface)
     validate!
     return real_iface
+  end
+
+  def _fix_bool(bool)
+    return bool if bool == !!bool
+    if bool.is_a?(String)
+      return false if bool == "false"
+      return true  if bool == "true"
+    end
+    puts "WARNING: _fix_bool. expecting boolean, got={bool}"
+    return nil
   end
 
 end
