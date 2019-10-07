@@ -7,4 +7,7 @@ install:
 uninstall:
 	./uninstall
 
-.PHONY: all install uninstall
+purge:
+	./uninstall purge
+
+.PHONY: all install uninstall purge
