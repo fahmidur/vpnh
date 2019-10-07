@@ -13,8 +13,32 @@ $logger = Logger.new(STDOUT)
 
 #--- BEG. Helpers
 def die_with_usage(msg=nil, ecode=1)
-  puts "Usage: vpnh [command]"
-  puts "\n#{msg}" if msg
+  puts "\n#{msg}\n---" if msg
+  puts <<EOF
+Usage: #{File.basename($0)} [command]
+
+help                       Display this message.
+status                     Display status.
+connect <ovpn_name>        Connect to a known ovpn.
+disconnect                 Disconnect.
+
+config                     Show current config file.
+config get <key>           Get a config value.
+config set <key> <val>     Set a config value.
+
+auths                      Show all auths.
+auths del <name>           Delete an auth.
+auths add <name> <user> <pass>
+                           Add an auth.
+
+ovpns                      Show all known ovpn files.
+ovpns flush                Delete all ovpn files.
+ovpns del <name>           Delete ovpn file with name.
+ovpns add <path>           Add a ovpn file.
+ovpns add <name> <path>    Add a ovpn file with name.
+ovpns add name=<name> auth=<auth> <path>
+                           Add a ovpn file with name and auth.
+EOF
   exit ecode
 end
 #--- END. Helper
