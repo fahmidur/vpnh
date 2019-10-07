@@ -154,23 +154,6 @@ class VpnhMaster
     IO.read(path).strip.split('.')[0..2].map(&:to_i)
   end
 
-  #def co_ensure
-    #if co_path == __dir__
-      #puts "co_ensure. skipped. called from co"
-      #return
-    #end
-    #Dir.mkdir_p(co_path) unless Dir.exists?(co_path)
-    #co_version = semver_read(File.join(co_path, 'VERSION'))
-    #my_version = semver_read(File.join(__dir__, 'VERSION'))
-    #if co_version == my_version
-      #puts "co_ensure. skipped. version is same"
-      #return
-    #end
-    #puts "co_ensure. copying co from here..."
-    #FileUtils.cp_r(File.join(__dir__, '.'), co_path)
-    #puts "co_ensure. copyzzz co from here... DONE"
-  #end
-
   def auths_path
     @auths_path ||= File.join(@the_path, 'auths')
   end
