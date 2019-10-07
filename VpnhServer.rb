@@ -62,7 +62,7 @@ class VpnhServer
     @t1 = Thread.new {
       while(@mainloop_go)
         $logger.info "."
-        st = @master.status
+        st = @master.status(:server)
         $logger.info "status=\n#{JSON.pretty_generate(st)}\n"
         if st[:connected]
           $logger.info "already connected"

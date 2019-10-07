@@ -72,13 +72,17 @@ class VpnhMaster
     return h
   end
 
-  def status
+  def status(from=nil)
     out = {}
     out[:xip_real] = get_xip_real
     out[:xip_virt] = get_xip_virt
     out[:openvpn_running] = openvpn_running?
     _status_calc_connected(out)
     out[:autoconnect] = config.get(:autoconnect)
+    unless from == :server
+      out[:server_running] = client.server_running?
+      out[:running_server_pid] = self.running_server_pid
+    end
     return out
   end
 
