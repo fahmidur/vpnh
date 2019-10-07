@@ -11,7 +11,10 @@ class VpnhMaster
   attr_reader :the_path
 
   def initialize
-    @config = VpnhConfig.new(con_path)
+  end
+
+  def config
+    @config ||= VpnhConfig.new(con_path)
   end
 
   def server_daemon
@@ -34,7 +37,7 @@ class VpnhMaster
       puts "killing openvpn at pid=#{pid}"
       Process.kill(15, pid)
     end
-    @config.set(:autoconnect, false)
+    config.set(:autoconnect, false)
     return true
   end
 
@@ -45,7 +48,7 @@ class VpnhMaster
   end
 
   def get_xip_virt
-    vpnh_user = @config.get(:vpnh_user)
+    vpnh_user = config.get(:vpnh_user)
     addr = IpAddr.new(Util.run("sudo -u #{vpnh_user} curl -s ifconfig.me").out)
     return nil unless addr.valid?
     return addr
@@ -75,15 +78,15 @@ class VpnhMaster
     out[:xip_virt] = get_xip_virt
     out[:openvpn_running] = openvpn_running?
     _status_calc_connected(out)
-    out[:autoconnect] = @config.get(:autoconnect)
+    out[:autoconnect] = config.get(:autoconnect)
     return out
   end
 
   def auto_connectable?
     return !!(
-      @config.is_valid? &&
-      @config.get(:autoconnect) &&
-      @config.get(:ovpn_sel)
+      config.is_valid? &&
+      config.get(:autoconnect) &&
+      config.get(:ovpn_sel)
     )
   end
 
@@ -95,7 +98,7 @@ class VpnhMaster
     end
     unless name
       puts "getting last ovpn_sel"
-      name = @config.get(:ovpn_sel)
+      name = config.get(:ovpn_sel)
       puts "fetched last ovpn_sel=#{name}" if name
     end
     unless name
@@ -112,8 +115,8 @@ class VpnhMaster
       return false
     end
     openvpn_prelock_acquire
-    @config.set(:autoconnect, true)
-    @config.set(:ovpn_sel, name)
+    config.set(:autoconnect, true)
+    config.set(:ovpn_sel, name)
     puts "openvpn. starting..."
     com = Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
     openvpn_prelock_release
@@ -163,10 +166,6 @@ class VpnhMaster
     #FileUtils.cp_r(File.join(__dir__, '.'), co_path)
     #puts "co_ensure. copyzzz co from here... DONE"
   #end
-
-  def config
-    @config
-  end
 
   def auths_path
     @auths_path ||= File.join(@the_path, 'auths')
@@ -229,9 +228,9 @@ class VpnhMaster
       return false
     end
     errors = []
-    vpnh_user = @config.get(:vpnh_user)
-    vpnh_tabl = @config.get(:vpnh_tabl)
-    real_iface = @config.get(:real_iface)
+    vpnh_user = config.get(:vpnh_user)
+    vpnh_tabl = config.get(:vpnh_tabl)
+    real_iface = config.get(:real_iface)
     errors << 'expecting config.vpnh_user'  unless vpnh_user
     errors << 'expecting config.vpnh_tabl'  unless vpnh_tabl
     errors << 'expecting config.real_iface' unless real_iface
@@ -303,9 +302,9 @@ class VpnhMaster
       return false
     end
     #---
-    vpnh_user  = @config.vpnh_user
-    vpnh_tabl  = @config.vpnh_tabl
-    real_iface = @config.real_iface
+    vpnh_user  = config.vpnh_user
+    vpnh_tabl  = config.vpnh_tabl
+    real_iface = config.real_iface
     #---
     unless self.setup
       puts "ERROR: setup failed"
