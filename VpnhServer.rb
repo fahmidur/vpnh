@@ -61,14 +61,18 @@ class VpnhServer
     DRb.start_service("drbunix://#{@master.ipc_path}", self)
     @t1 = Thread.new {
       while(@mainloop_go)
-        $logger.info "."
+        $logger.info "+===---===---+"
         st = @master.status(:server)
         $logger.info "status=\n#{JSON.pretty_generate(st)}\n"
         if st[:connected]
-          $logger.info "already connected"
-        elsif @master.auto_connectable?
-          $logger.info "auto_connectable. connecting..."
-          @master.connect
+          $logger.info "already connected. -SKIP-"
+        else 
+          if @master.auto_connectable?
+            $logger.info "auto_connectable. connecting..."
+            @master.connect
+          else
+            $logger.info "NOT autoconnectable. -SKIP-"
+          end
         end
         sleep 15
       end

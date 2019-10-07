@@ -123,7 +123,7 @@ class VpnhMaster
       return false
     end
     if openvpn_prelocked?
-      puts "ERROR: openvpn_prelocked. another openvpn-start is taking place"
+      puts "ERROR: openvpn_prelocked. another connect/openvpn is taking place"
       return false
     end
     openvpn_prelock_acquire
@@ -131,6 +131,7 @@ class VpnhMaster
     config.set(:ovpn_sel, name)
     puts "openvpn. starting..."
     com = Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
+    puts "openvpn. start_ed... DONE"
     openvpn_prelock_release
     return com.success?
   end
