@@ -134,10 +134,11 @@ class VpnhMaster
     File.exists?(openvpn_prelock_path)
   end
   def openvpn_prelock_acquire
-    FileUtils.rm(openvpn_prelock_path)
+    IO.write(openvpn_prelock_path, Time.now.to_i.to_s)
   end
   def openvpn_prelock_release
-    FileUtils.rm(openvpn_prelock_path)
+    return unless File.exists?(openvpn_prelock_path)
+    FileUtils.rm_f(openvpn_prelock_path)
   end
 
   def openvpn_pid
