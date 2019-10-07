@@ -45,14 +45,17 @@ end
 
 if command == 'server'
   master.server.ignition
+elsif command == 'setup'
+  ok = master.setup
+  puts "ok=#{ok}"
 elsif command == 'connect'
-  master.connect()
+  master.connect
 elsif command =~ /^connect ([a-zA-Z0-9\.\-_]+)/
   name = $1
   puts "name=#{name}"
   master.connect(name)
 elsif command == 'disconnect'
-  master.disconnect()
+  master.disconnect
 elsif command == 'server daemon'
   # run the server as a daemon unless it is already running
   master.server_daemon_ensure

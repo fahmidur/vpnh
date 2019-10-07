@@ -75,6 +75,9 @@ puts "copying new checkout dir: #{$TCO_DIR}"
 FileUtils.cp_r(File.join(__dir__, '.'), $TCO_DIR)
 puts "--done"
 
+Util.run("#{$VPNH_PATH} config default")
+Util.run("#{$VPNH_PATH} setup")
+
 if Util.which("systemctl")
   puts "installing vpnh systemd service..."
   system("systemctl --force disable vpnh")
