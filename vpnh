@@ -119,6 +119,8 @@ elsif command =~ /^config set ([a-zA-Z0-9\-\._]+) (.+)/
   master.client.config_update
   puts "---"
   config_show(master)
+elsif command == 'config default'
+  master.config.default!
 elsif command == 'auths flush'
   master.auths.flush
   puts "OK. all auths removed"

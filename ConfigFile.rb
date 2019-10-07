@@ -9,18 +9,26 @@ class ConfigFile
     @data_write_lock = false
     @data = {}
     data_read
-    data_write if changed?
+    data_write_if_changed
   end
 
   def get(key)
     @data[key.to_s]
   end
 
-  def set_multi
+  def data_write_lock_acquire
     @data_write_lock = true
-    yield
+  end
+
+  def data_write_lock_release
     @data_write_lock = false
-    data_write if changed?
+  end
+
+  def set_multi
+    data_write_lock_acquire
+    yield
+    data_write_lock_release
+    data_write_if_changed
   end
 
   def set(key, val)
@@ -30,7 +38,7 @@ class ConfigFile
     else
       @data.delete(key)
     end
-    data_write if changed?
+    data_write_if_changed
   end
 
   def data_read
@@ -59,6 +67,11 @@ class ConfigFile
 
   def changed?
     @data_read != @data || !File.exists?(@file_path)
+  end
+
+  def data_write_if_changed
+    return unless changed?
+    self.data_write
   end
 
 end

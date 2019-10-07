@@ -21,6 +21,13 @@ class VpnhConfig
     validate!
   end
 
+  def default!
+    @confile.data_write_lock_acquire
+    self.real_iface_default!
+    @confile.data_write_lock_release
+    @confile.data_write_if_changed
+  end
+
   def validate!
     @errors = []
     unless self.real_iface
@@ -85,23 +92,25 @@ class VpnhConfig
   end
 
   def real_iface=(val)
-    if val
-      all_ifaces = Util.get_all_ifaces
-      unless all_ifaces.member?(val)
-        puts "WARNING: #{val} is not a valid iface"
-      end
-      @confile.set(:real_iface, val)
-      validate!
-      return real_iface
-    else
-      default_iface = Util.get_default_iface
-      unless default_iface
-        puts "WARNING: unable to determine default_iface"
-      end
-      @confile.set(:real_iface, default_iface)
-      validate!
-      return real_iface
+    return real_iface_default! unless val
+    all_ifaces = Util.get_all_ifaces
+    unless all_ifaces.member?(val)
+      puts "WARNING: #{val} is not a valid iface"
     end
+    @confile.set(:real_iface, val)
+    validate!
+    return real_iface
+  end
+
+  def real_iface_default!
+    default_iface = Util.get_default_iface
+    unless default_iface
+      puts "WARNING: unable to determine default_iface"
+      return nil
+    end
+    @confile.set(:real_iface, default_iface)
+    validate!
+    return real_iface
   end
 
 end
