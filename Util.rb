@@ -1,6 +1,7 @@
 module Util
   require 'set'
   require 'ostruct'
+  require 'fileutils'
 
   class Command
     attr_reader :return
@@ -276,6 +277,13 @@ module Util
     STDOUT.reopen '/dev/null'
     STDERR.reopen '/dev/null'
     yield
+  end
+
+  def self.pidfile_active_pid(path)
+    return false unless File.exists(path)
+    pid = IO.read(path).split("\n")[0].strip.to_i
+    return pid if Util.process_exists?(pid)
+    return nil
   end
   
   def self.process_exists?(pid)
