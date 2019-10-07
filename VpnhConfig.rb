@@ -124,8 +124,8 @@ class VpnhConfig
     puts "_fix_bool. bool=#{bool}(#{bool.class})"
     return bool if bool == !!bool
     if bool.is_a?(String)
-      return false if bool == /^\s*false\s*$/i
-      return true  if bool == /^\s*true\s*$/i
+      return false if bool =~ /^\s*false\s*$/i
+      return true  if bool =~ /^\s*true\s*$/i
     end
     puts "WARNING: _fix_bool. expecting boolean. bool=#{bool}(#{bool.class})"
     return nil

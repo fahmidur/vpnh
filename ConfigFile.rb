@@ -33,10 +33,10 @@ class ConfigFile
 
   def set(key, val)
     key = key.to_s
-    if val
-      @data[key] = val
-    else
+    if val == nil
       @data.delete(key)
+    else
+      @data[key] = val
     end
     data_write_if_changed
   end
