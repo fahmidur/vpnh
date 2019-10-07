@@ -121,12 +121,13 @@ class VpnhConfig
   end
 
   def _fix_bool(bool)
+    puts "_fix_bool. bool=#{bool}(#{bool.class})"
     return bool if bool == !!bool
     if bool.is_a?(String)
-      return false if bool == "false"
-      return true  if bool == "true"
+      return false if bool == /^\s*false\s*$/i
+      return true  if bool == /^\s*true\s*$/i
     end
-    puts "WARNING: _fix_bool. expecting boolean, got={bool}"
+    puts "WARNING: _fix_bool. expecting boolean. bool=#{bool}(#{bool.class})"
     return nil
   end
 
