@@ -4,4 +4,7 @@ all:
 install:
 	./install
 
-.PHONY: all install
+uninstall:
+	./uninstall
+
+.PHONY: all install uninstall
