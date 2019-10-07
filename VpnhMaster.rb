@@ -13,6 +13,14 @@ class VpnhMaster
   def initialize
   end
 
+  def version
+    return @version if @version
+    version_path = File.join(__dir__, 'VERSION')
+    return nil unless File.exists?(version_path)
+    @version = semver_read(version_path)
+    return @version
+  end
+
   def config
     @config ||= VpnhConfig.new(con_path)
   end

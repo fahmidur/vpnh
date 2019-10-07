@@ -51,7 +51,7 @@ unless command && command.size > 0
   die_with_usage
 end
 
-if command == 'help' || command == 'h'
+if command =~ /^\-*h(elp)?$/i
   die_with_usage(nil, 0)
 end
 
@@ -67,7 +67,14 @@ def config_show(master)
   end
 end
 
-if command == 'server'
+if command =~ /^\-*v(ersion)?/i
+  version = master.version
+  if version
+    puts "Version: #{version.join('.')}"
+  else
+    puts "ERROR: failed to get version"
+  end
+elsif command == 'server'
   master.server.ignition
 elsif command == 'setup'
   ok = master.setup
