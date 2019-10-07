@@ -71,7 +71,10 @@ class Ovpns
       # vpnh modifications
       olines << '#vpnh{'
       olines << 'route-nopull'
-      olines << "script-security 3 system"
+      #olines << "script-security 3 system"
+      olines << "script-security 3"
+      # Re: script-security <lvl> [method] --
+      # method option no longer supported as of OpenVPN 2.3
       olines << "up #{@master.co_ovpn_up_path}"
       olines << "down #{@master.co_ovpn_down_path}"
       if auth_path
