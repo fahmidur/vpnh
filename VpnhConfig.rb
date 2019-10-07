@@ -24,6 +24,7 @@ class VpnhConfig
   def default!
     @confile.data_write_lock_acquire
     self.real_iface_default!
+    @confile.set(:autoconnect, (@confile.get(:autoconnect)||false))
     @confile.data_write_lock_release
     @confile.data_write_if_changed
   end
@@ -103,6 +104,7 @@ class VpnhConfig
   end
 
   def real_iface_default!
+    return if @confile.get(:real_iface)
     default_iface = Util.get_default_iface
     unless default_iface
       puts "WARNING: unable to determine default_iface"
