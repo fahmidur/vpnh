@@ -47,12 +47,17 @@ module Util
       puts "dir_ensure. dir already exists. path=#{path} "
       return true
     end
+    puts "dir_ensure. making path=#{path}"
     FileUtils.mkdir_p(path)
     return true
   end
 
   def self.dir_remake(path)
-    FileUtils.rm_rf(path) if Dir.exists?(path)
+    if Dir.exists?(path)
+      puts "dir_remake. removing path=#{path}"
+      FileUtils.rm_rf(path) 
+    end
+    puts "dir_remake. remaking path=#{path}"
     FileUtils.mkdir_p(path)
     return true
   end
