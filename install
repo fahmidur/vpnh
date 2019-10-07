@@ -1,15 +1,12 @@
 #!/usr/bin/env ruby
 
 require 'fileutils'
+require_relative 'Util'
 
 $THE_DIR = '/var/opt/vpnh'
 $TCO_DIR = File.join($THE_DIR, 'co')
 $VPNH_PATH = File.join($TCO_DIR, 'vpnh')
 $VPNH_SERVICE_PATH = File.join($TCO_DIR, 'vpnh.service')
-
-def ensure_dir(path)
-  FileUtils.mkdir_p(path) unless(path)
-end
 
 def install_shellrc(filepath)
   unless File.exists?(filepath)
@@ -65,12 +62,8 @@ if File.exists?($VPNH_PATH)
   puts "--done"
 end
 
-ensure_dir($THE_DIR)
-if Dir.exist?($TCO_DIR)
-  puts "removing old checkout dir: #{$TCO_DIR}"
-  FileUtils.rm_rf($TCO_DIR)
-  puts "--done"
-end
+Util.dir_ensure($THE_DIR)
+Util.dir_remake($TCO_DIR)
 
 puts "copying new checkout dir: #{$TCO_DIR}"
 FileUtils.cp_r(File.join(__dir__, '.'), $TCO_DIR)

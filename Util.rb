@@ -42,6 +42,21 @@ module Util
     end
   end
 
+  def self.dir_ensure(path)
+    if Dir.exists?(path)
+      puts "dir_ensure. dir already exists. path=#{path} "
+      return true
+    end
+    FileUtils.mkdir_p(path)
+    return true
+  end
+
+  def self.dir_remake(path)
+    FileUtils.rm_rf(path) if Dir.exists?(path)
+    FileUtils.mkdir_p(path)
+    return true
+  end
+
   def self.which(prog_name)
     com = Command.new("which #{prog_name}")
     return nil unless com.out.size > 0
