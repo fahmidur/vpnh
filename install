@@ -8,26 +8,26 @@ $TCO_DIR = File.join($THE_DIR, 'co')
 $VPNH_PATH = File.join($TCO_DIR, 'vpnh')
 $VPNH_SERVICE_PATH = File.join($TCO_DIR, 'vpnh.service')
 
-def install_shellrc(filepath)
-  unless File.exists?(filepath)
-    puts "install_shellrc. no such file at #{filepath}"
+def shellrc_path_add(shellrc_path, path_item)
+  unless File.exists?(shellrc_path)
+    puts "shellrc_path_add. no such file at #{shellrc_path}"
     return false
   end
-  new_line = "export PATH=$PATH:#{$TCO_DIR} #VPNH_INSTALL"
+  new_line = "export PATH=$PATH:#{path_item} #VPNH_INSTALL"
   already_installed = false
-  File.open(filepath) do |f|
+  File.open(shellrc_path) do |f|
     f.each_line do |line|
       line = line.strip
       if line == new_line
-        puts "install_shellrc. already installed. --SKIPPED"
+        puts "shellrc_path_add. already installed. --SKIPPED"
         already_installed = true
         break
       end
     end
   end
   return true if already_installed
-  puts "install_shellrc. appending to PATH within #{filepath}..."
-  File.open(filepath, 'a') do |f|
+  puts "shellrc_path_add. appending to PATH within #{shellrc_path}..."
+  File.open(shellrc_path, 'a') do |f|
     f.puts(new_line)
   end
   puts "--- done"
@@ -69,7 +69,7 @@ puts "copying new checkout dir: #{$TCO_DIR}"
 FileUtils.cp_r(File.join(__dir__, '.'), $TCO_DIR)
 puts "--done"
 
-if `which systemctl`.strip.size > 0
+if Util.which("systemctl")
   puts "installing vpnh systemd service..."
   system("systemctl --force disable vpnh")
   system("systemctl --force enable #{$VPNH_SERVICE_PATH}")
@@ -79,7 +79,7 @@ if `which systemctl`.strip.size > 0
   puts "--done"
 end
 
-install_shellrc(File.join(ENV['HOME'], '.bashrc'))
-install_shellrc(File.join(ENV['HOME'], '.zshrc'))
+shellrc_path_add(File.join(ENV['HOME'], '.bashrc'), $TCO_DIR)
+shellrc_path_add(File.join(ENV['HOME'], '.zshrc' ), $TCO_DIR)
 
 puts "--done. installation complete."
