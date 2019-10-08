@@ -20,17 +20,22 @@ module Installer
       puts "manually stopping vpnh ..."
       Util.run("#{VPNH_PATH} stop")
     end
+
     while pid=Util.pidfile_active_pid(VPNH_PID_PATH)
       puts "Waiting for vpnh server to exit... pid=#{pid}"
       sleep 1
     end
+
     puts "Killing openvpn..."
     Util.run("pkill openvpn")
-    while pid=Util.pidfile_active_pid(OPENVPN_PID_PATH)
+    openvpn_pid = Util.pidfile_pid(OPENVPN_PID_PATH)
+    while openvpn_pid && Util.process_exists?(openvpn_pid)
       puts "Waiting for openvpn to exit... pid=#{pid}"
-      sleep 1
+      sleep 0.2
     end
+
     FileUtils.rm_rf(TCO_PATH)
+
     if purge
       puts "purging..."
       puts "removing THE_PATH=#{THE_PATH}"

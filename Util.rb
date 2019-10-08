@@ -324,11 +324,16 @@ module Util
     STDERR.reopen '/dev/null'
     yield
   end
+  
+  def self.pifile_pid(path)
+    return nil unless File.exists?(path)
+    pid = IO.read(path).strip.split("\n")[0].strip.to_i
+    return pid
+  end
 
   def self.pidfile_active_pid(path)
-    return false unless File.exists?(path)
-    pid = IO.read(path).split("\n")[0].strip.to_i
-    return pid if Util.process_exists?(pid)
+    pid = Util.pidfile_pid(path)
+    return pid if pid && Util.process_exists?(pid)
     return nil
   end
   
