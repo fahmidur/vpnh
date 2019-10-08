@@ -42,7 +42,7 @@ class VpnhServer
 
   def t1_kill
     return unless @t1
-    $logger.info "killing t1..."
+    puts "killing t1..."
     Thread.kill(@t1)
   end
 
@@ -51,7 +51,7 @@ class VpnhServer
   end
 
   def config_update
-    $logger.info "config_update. updating..."
+    puts "config_update. updating..."
     @master.config.data_read_lazy
   end
 
@@ -62,18 +62,18 @@ class VpnhServer
     DRb.start_service("drbunix://#{@master.ipc_path}", self)
     @t1 = Thread.new {
       while(@mainloop_go)
-        $logger.info "+===---===---+"
+        puts "========================================"
         self.config_update
         st = @master.status(:server)
-        $logger.info "status=\n#{JSON.pretty_generate(st)}\n"
+        puts "status=\n#{JSON.pretty_generate(st)}\n"
         if st[:connected]
-          $logger.info "already connected. -SKIP-"
+          puts "already connected. -SKIP-"
         else 
           if @master.auto_connectable?
-            $logger.info "auto_connectable. connecting..."
+            puts "auto_connectable. connecting..."
             @master.connect
           else
-            $logger.info "NOT autoconnectable. -SKIP-"
+            puts "NOT autoconnectable. -SKIP-"
           end
         end
         sleep 15

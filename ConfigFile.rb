@@ -72,7 +72,6 @@ class ConfigFile
 
   def data_write
     return if @data_write_lock
-    #$logger.info "VpnhConfig. data_write ..."
     dirname = File.dirname(@file_path)
     FileUtils.mkdir_p(dirname)
     data = @data.clone

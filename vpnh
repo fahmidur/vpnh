@@ -7,10 +7,6 @@ require 'json'
 require_relative 'Util'
 require_relative 'VpnhMaster.rb'
 
-#--- BEG. Globals
-$logger = Logger.new(STDOUT)
-#--- END. Globals
-
 #--- BEG. Helpers
 def die_with_usage(msg=nil, ecode=1)
   puts "\n#{msg}\n---" if msg
