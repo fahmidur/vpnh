@@ -16,19 +16,19 @@ class ConfigFile
     @data[key.to_s]
   end
 
+  def with_wlock
+    data_write_lock_acquire
+    yield
+    data_write_lock_release
+    data_write_if_changed
+  end
+
   def data_write_lock_acquire
     @data_write_lock = true
   end
 
   def data_write_lock_release
     @data_write_lock = false
-  end
-
-  def set_multi
-    data_write_lock_acquire
-    yield
-    data_write_lock_release
-    data_write_if_changed
   end
 
   def set(key, val)

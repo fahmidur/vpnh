@@ -16,17 +16,22 @@ class VpnhConfig
       'autoconnect',
       'ovpn_sel',
     ])
-    set_defaults!
+    default!
     @errors = []
     validate!
   end
 
   def default!
-    @confile.data_write_lock_acquire
-    self.real_iface_default!
-    self.autoconnect = false
-    @confile.data_write_lock_release
-    @confile.data_write_if_changed
+    @confile.with_wlock do
+      self.set(:vpnh_user, 'vpnh_user') unless self.get(:vpnh_user)
+      self.set(:vpnh_tabl, 'vpnh_tabl') unless self.get(:vpnh_tabl)
+      self.real_iface_default!
+      if @confile.get(:autoconnect) == nil
+        self.autoconnect = false
+      end
+    end
+    validate!
+    return true
   end
 
   def validate!
@@ -44,14 +49,6 @@ class VpnhConfig
   
   def is_valid?
     @errors.size == 0
-  end
-
-  def set_defaults!
-    @confile.set_multi do
-      self.set(:vpnh_user, 'vpnh_user') unless self.get(:vpnh_user)
-      self.set(:vpnh_tabl, 'vpnh_tabl') unless self.get(:vpnh_tabl)
-    end
-    validate!
   end
 
   def to_h
