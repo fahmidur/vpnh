@@ -50,14 +50,14 @@ class VpnhMaster
   end
 
   def get_xip_real
-    addr = IpAddr.new(Util.run("curl -s ifconfig.me").out)
+    addr = IpAddr.new(Util.run("curl -s -m 10 ifconfig.me").out)
     return nil unless addr.valid?
     return addr
   end
 
   def get_xip_virt
     vpnh_user = config.get(:vpnh_user)
-    addr = IpAddr.new(Util.run("sudo -u #{vpnh_user} curl -s ifconfig.me").out)
+    addr = IpAddr.new(Util.run("sudo -u #{vpnh_user} curl -s -m 10 ifconfig.me").out)
     return nil unless addr.valid?
     return addr
   end
