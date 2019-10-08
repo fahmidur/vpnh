@@ -41,10 +41,27 @@ class ConfigFile
     data_write_lazy
   end
 
+  def data_read_lazy
+    return unless File.exists?(@file_path)
+    file_mtime = File.mtime(@file_path)
+    if @data_read_mtime && file_mtime < @data_read_mtime
+      puts "ConfigFile. data_read_lazy. read skipped."
+      return
+    end
+    data_read
+    @data_read_mtime = file_mtime
+  end
+
   def data_read
     return unless File.exists?(@file_path)
     gdata = {}
-    odata = JSON.parse(IO.read(@file_path))
+    #odata = JSON.parse(IO.read(@file_path))
+    fbody = ""
+    File.open(@file_path, 'r') do |f|
+      f.flock(File::LOCK_SH)
+      fbody = f.read
+    end
+    odata = JSON.parse(fbody)
     odata.each do |k, v|
       next if k[0] == '_'
       gdata[k] = v
@@ -61,8 +78,15 @@ class ConfigFile
     data = @data.clone
     data['_write_ts'] = Time.now.to_i
     json_str = JSON.pretty_generate(data)
-    IO.write(@file_path, json_str+"\n")
-    data_read
+    #IO.write(@file_path, json_str+"\n")
+    File.open(@file_path, File::RDWR|File::CREAT) do |f|
+      f.flock(File::LOCK_EX)
+      f.rewind
+      f.write(json_str)
+      f.flush
+      f.truncate(f.pos)
+    end
+    data_read_lazy
   end
 
   def changed?

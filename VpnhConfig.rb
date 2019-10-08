@@ -65,6 +65,10 @@ class VpnhConfig
     return @confile.get(key)
   end
 
+  def data_read_lazy
+    @confile.data_read_lazy
+  end
+
   def method_missing(meth, *args, &block)
     return self.get(meth)
   end

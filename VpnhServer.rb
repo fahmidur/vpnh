@@ -51,7 +51,8 @@ class VpnhServer
   end
 
   def config_update
-    @master.config.read_data
+    $logger.info "config_update. updating..."
+    @master.config.data_read_lazy
   end
 
   private
@@ -62,6 +63,7 @@ class VpnhServer
     @t1 = Thread.new {
       while(@mainloop_go)
         $logger.info "+===---===---+"
+        self.config_update
         st = @master.status(:server)
         $logger.info "status=\n#{JSON.pretty_generate(st)}\n"
         if st[:connected]
