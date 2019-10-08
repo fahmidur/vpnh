@@ -47,10 +47,10 @@ module Installer
     Installer.uninstall
     Util.package_ensure('curl')
     Util.package_ensure('openvpn')
-    Util.dir_ensure(THE_DIR)
-    Util.dir_remake(TCO_DIR)
-    puts "copying new checkout dir: #{TCO_DIR}"
-    FileUtils.cp_r(File.join(__dir__, '.'), TCO_DIR)
+    Util.dir_ensure(THE_PATH)
+    Util.dir_remake(TCO_PATH)
+    puts "copying new checkout dir: #{TCO_PATH}"
+    FileUtils.cp_r(File.join(__dir__, '.'), TCO_PATH)
     puts "--done"
     Util.run("#{VPNH_PATH} config default")
     Util.run("#{VPNH_PATH} setup")
@@ -62,8 +62,8 @@ module Installer
       Util.run("systemctl start vpnh")
       puts "--done"
     end
-    Util.shellrc_path_add(File.join(ENV['HOME'], '.bashrc'), TCO_DIR)
-    Util.shellrc_path_add(File.join(ENV['HOME'], '.zshrc' ), TCO_DIR)
+    Util.shellrc_path_add(File.join(ENV['HOME'], '.bashrc'), TCO_PATH)
+    Util.shellrc_path_add(File.join(ENV['HOME'], '.zshrc' ), TCO_PATH)
     puts "--done. installation complete."
   end
 
