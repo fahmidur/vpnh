@@ -255,6 +255,13 @@ module Util
     end
   end
 
+  def self.pgrep(name)
+    com = Util.run("pgrep #{name}")
+    return nil unless com
+    out = com.out
+    return out.split("\n").map(&:to_i)
+  end
+
   def self.routing_table_del(table_name)
     routing_tables = Util.get_routing_tables
     unless Util.sys_write_ok?

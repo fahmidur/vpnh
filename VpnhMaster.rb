@@ -108,6 +108,11 @@ class VpnhMaster
       puts "ERROR: openvpn already running at pid=#{pid}"
       return false
     end
+    pids = Util.pgrep("openvpn")
+    if pids && pids.size > 0
+      puts "ERROR: another openvpn is still running. pids=#{pids}"
+      return false
+    end
     unless name
       puts "getting last ovpn_sel"
       name = config.get(:ovpn_sel)
