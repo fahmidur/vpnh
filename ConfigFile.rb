@@ -9,7 +9,7 @@ class ConfigFile
     @data_write_lock = false
     @data = {}
     data_read
-    data_write_if_changed
+    data_write_lazy
   end
 
   def get(key)
@@ -20,7 +20,7 @@ class ConfigFile
     data_write_lock_acquire
     yield
     data_write_lock_release
-    data_write_if_changed
+    data_write_lazy
   end
 
   def data_write_lock_acquire
@@ -38,7 +38,7 @@ class ConfigFile
     else
       @data[key] = val
     end
-    data_write_if_changed
+    data_write_lazy
   end
 
   def data_read
@@ -69,7 +69,7 @@ class ConfigFile
     @data_read != @data || !File.exists?(@file_path)
   end
 
-  def data_write_if_changed
+  def data_write_lazy
     return unless changed?
     self.data_write
   end
