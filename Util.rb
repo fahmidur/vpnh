@@ -325,7 +325,7 @@ module Util
     yield
   end
   
-  def self.pifile_pid(path)
+  def self.pidfile_pid(path)
     return nil unless File.exists?(path)
     pid = IO.read(path).strip.split("\n")[0].strip.to_i
     return pid
