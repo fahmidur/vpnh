@@ -43,6 +43,52 @@ module Util
     end
   end
 
+
+  def self.package_install(name)
+    puts "package_install. installing #{name} ..."
+    if Util.which("apt-get")
+      puts "packag_install. found apt-get"
+      Util.run("apt-get install -y #{name}")
+      return true
+    end
+    puts "package_install. unable to find package-manger"
+    return false
+  end
+
+  def self.package_ensure(name)
+    if Util.which(name)
+      puts "package_ensure. #{name} already installed"
+      return true
+    end
+    return Util.package_install(name)
+  end
+
+  def self.shellrc_path_add(shellrc_path, path_item)
+    unless File.exists?(shellrc_path)
+      puts "shellrc_path_add. no such file at #{shellrc_path}"
+      return false
+    end
+    new_line = "export PATH=$PATH:#{path_item} #VPNH_INSTALL"
+    already_installed = false
+    File.open(shellrc_path) do |f|
+      f.each_line do |line|
+        line = line.strip
+        if line == new_line
+          puts "shellrc_path_add. already installed. --SKIPPED"
+          already_installed = true
+          break
+        end
+      end
+    end
+    return true if already_installed
+    puts "shellrc_path_add. appending to PATH within #{shellrc_path}..."
+    File.open(shellrc_path, 'a') do |f|
+      f.puts(new_line)
+    end
+    puts "--- done"
+    return true
+  end
+
   def self.dir_ensure(path)
     if Dir.exists?(path)
       puts "dir_ensure. dir already exists. path=#{path} "

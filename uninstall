@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative 'Util'
 require_relative 'Installer'
 
 purge = ARGV[0] && ARGV[0] =~ /^\-*purge$/
-puts "purge=#{purge}"
 Installer.uninstall(purge: purge)

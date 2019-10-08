@@ -10,9 +10,6 @@ module Installer
   VPNH_PID_PATH     = File.join(TCO_PATH, 'lock.pid')
   OPENVPN_PID_PATH  = File.join(TCO_PATH, 'openvpn.pid')
 
-  def self.install
-  end
-
   def self.uninstall(purge: false)
     if Util.which("systemctl")
       puts "systemctl. stopping / disabling service"
@@ -39,6 +36,30 @@ module Installer
       puts "removing THE_PATH=#{THE_PATH}"
       FileUtils.rm_rf(THE_PATH)
     end
+  end
+
+  def self.install
+    Installer.uninstall
+    Util.package_ensure('curl')
+    Util.package_ensure('openvpn')
+    Util.dir_ensure(THE_DIR)
+    Util.dir_remake(TCO_DIR)
+    puts "copying new checkout dir: #{TCO_DIR}"
+    FileUtils.cp_r(File.join(__dir__, '.'), TCO_DIR)
+    puts "--done"
+    Util.run("#{VPNH_PATH} config default")
+    Util.run("#{VPNH_PATH} setup")
+    if Util.which("systemctl")
+      puts "installing vpnh systemd service..."
+      Util.run("systemctl --force disable vpnh")
+      Util.run("systemctl --force enable #{VPNH_SERVICE_PATH}")
+      Util.run("systemctl daemon-reload")
+      Util.run("systemctl start vpnh")
+      puts "--done"
+    end
+    Util.shellrc_path_add(File.join(ENV['HOME'], '.bashrc'), TCO_DIR)
+    Util.shellrc_path_add(File.join(ENV['HOME'], '.zshrc' ), TCO_DIR)
+    puts "--done. installation complete."
   end
 
 end
