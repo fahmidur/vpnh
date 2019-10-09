@@ -32,9 +32,13 @@ class VpnhMaster
   end
 
   def server_daemon_ensure
-    if client.server_running?
-      puts "server is already running"
-      return true
+    if server_running?
+      puts "a server is already running"
+      return
+    end
+    if server_ponging?
+      puts "a server is already ponging"
+      return
     end
     self.server_daemon
   end
@@ -62,35 +66,30 @@ class VpnhMaster
     return addr
   end
 
-  def openvpn_running?
-    pid = openvpn_pid
-    return !!(pid && Util.process_exists?(pid))
-  end
-
-  def _status_calc_connected(h)
-    h[:openvpn_running] = openvpn_running? unless h.has_key?(:openvpn_running)
-    unless h[:openvpn_running]
-      h[:connected] = false
-      return
-    end
-    h[:xip_virt] = get_xip_virt unless h.has_key?(:xip_virt)
-    if h[:xip_real] && h[:xip_virt] && h[:xip_real] != h[:xip_virt]
-      h[:connected] = true
-    end
-    return h
+  def openvpn_running?(pid=nil)
+    pid = openvpn_pid unless pid
+    return pid if pid && Util.process_exists?(pid)
+    return nil
   end
 
   def status(from=nil)
     out = {}
     out[:xip_real] = get_xip_real
     out[:xip_virt] = get_xip_virt
-    out[:openvpn_running] = openvpn_running?
-    _status_calc_connected(out)
+    out[:openvpn_pid] = openvpn_pid
+    out[:openvpn_running] = openvpn_running?(out[:openvpn_pid])
     out[:autoconnect] = config.get(:autoconnect)
     unless from == :server
-      out[:server_running] = client.server_running?
-      out[:running_server_pid] = self.running_server_pid
+      out[:server_pid] = server_pid
+      out[:server_running] = server_running?(out[:server_pid])
+      out[:server_ponging] = server_ponging?
     end
+    out[:connected] = (
+      out[:openvpn_running] && 
+      out[:xip_virt] && 
+      out[:xip_real] && 
+      out[:xip_real] != out[:xip_virt]
+    )
     return out
   end
 
@@ -156,8 +155,10 @@ class VpnhMaster
   end
 
   def openvpn_pid
-    return nil unless File.exists?(openvpn_pid_path)
-    return IO.read(openvpn_pid_path).strip.to_i
+    if File.exists?(openvpn_pid_path)
+      return IO.read(openvpn_pid_path).strip.to_i
+    end
+    return Util.pgrep("openvpn").first
   end
 
   def openvpn_pid_path
@@ -212,13 +213,19 @@ class VpnhMaster
     @con_path ||= File.join(the_path, 'config.json');
   end
 
-  def running_server_pid
+  def server_pid
     return nil unless File.exists?(pid_path)
-    existing_pid = IO.read(pid_path).strip.to_i
-    if existing_pid && Util.process_exists?(existing_pid)
-      return existing_pid
-    end
+    return IO.read(pid_path).strip.to_i
+  end
+
+  def server_running?(pid=nil)
+    pid = server_pid unless pid
+    return pid if pid && Util.process_exists?(pid)
     return nil
+  end
+
+  def server_ponging?
+    return client.ponging?
   end
 
   # must succeed before ovpn_up

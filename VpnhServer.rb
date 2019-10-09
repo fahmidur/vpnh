@@ -8,7 +8,7 @@ class VpnhServer
   end
 
   def ignition
-    if (existing_pid=@master.running_server_pid)
+    if (existing_pid=@master.server_running?)
       raise "Another VpnhServer is already running at PID=#{existing_pid}"
     end
     IO.write(@master.pid_path, "#{Process.pid}\n")
@@ -32,8 +32,11 @@ class VpnhServer
     DRb.stop_service
   end
 
-  def running?
-    return true
+  def ponging?
+    return {
+      :pid => Process.pid,
+      :now => Time.now.to_i
+    }
   end
 
   def time
