@@ -51,7 +51,7 @@ All commands below are expected to be run as root.
 
 Show current configuration:
 ```
-vpnh config show
+vpnh config
 ```
 
 Set a configuration value:
@@ -77,7 +77,7 @@ vpnh config set real_iface eth0
 
 Show all auths known to vpnh:
 ```
-vpnh auths show
+vpnh auths
 ```
 
 Add an auth:
@@ -99,7 +99,7 @@ vpnh auths flush
 
 Show all ovpns known to vpnh:
 ```
-vpnh ovpns show
+vpnh ovpns
 ```
 
 Add an OpenVPN config file without any auth:
