@@ -14,7 +14,6 @@ class VpnhClient
     if @server && @server.respond_to?(meth)
       @server.public_send(meth, *args, &block)
     end
-    return nil
   end
 
   private
