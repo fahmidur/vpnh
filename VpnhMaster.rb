@@ -196,7 +196,7 @@ class VpnhMaster
 
   def the_path
     return @the_path if @the_path
-    @the_path = '/var/opt/vpnh'
+    @the_path = '/opt/vpnh'
     Util.dir_ensure(@the_path)
     return @the_path
   end

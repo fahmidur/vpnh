@@ -2,7 +2,7 @@ module Installer
   require 'fileutils'
   require_relative 'Util'
 
-  THE_PATH          = '/var/opt/vpnh'
+  THE_PATH          = '/opt/vpnh'
   TCO_PATH          = File.join(THE_PATH, 'co')
   VPNH_PATH         = File.join(TCO_PATH, 'vpnh')
   VPNH_SERVICE_NAME = 'vpnh.service'

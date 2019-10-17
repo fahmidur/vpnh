@@ -7,7 +7,7 @@ Type=simple
 User=root
 Group=root
 
-ExecStart=/var/opt/vpnh/co/vpnh server
+ExecStart=/opt/vpnh/co/vpnh server
 
 Restart=on-failure
 
