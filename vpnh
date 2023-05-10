@@ -106,7 +106,7 @@ elsif command =~ /^ovpn_(up|down)(.*)$/
   up_or_down = $1
   unless ['up', 'down'].member?(up_or_down)
     puts "ERROR. expecting up or down"
-    return 1
+    exit(1)
   end
   args = $2.strip.split(/\s+/)
   puts "args=#{args}"
