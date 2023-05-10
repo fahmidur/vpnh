@@ -1,9 +1,9 @@
 # vpnh - A VPN Helper
 
-This is a daemon to help you do vpn [**split-tunneling**](https://en.wikipedia.org/wiki/Split_tunneling) on Linux/Ubuntu. 
+This is a daemon to help you do VPN [**split-tunneling**](https://en.wikipedia.org/wiki/Split_tunneling) on Linux/Ubuntu. 
 It is primarily a wrapper around the OpenVPN client.
 
-With vpnh you can add a number of openvpn config files and connect to any of them. 
+With vpnh you can add a number of OpenVPN config files and connect to any of them. 
 The config file will be modifed to ensure that it does not put your entire machine under the vpn. 
 Upon connection vpnh will create a user named `vpnh_user` and set up all of the routing rules
 to ensure that only that user is under the VPN.
@@ -23,6 +23,16 @@ the documentation is incomplete, the commands are subject to change, tests need 
 * Ruby
 
 ## Installation
+
+Installation is simple, clone this to where
+you normally keep your repos. 
+
+```
+cd ~/data/repos
+git clone git@github.com:fahmidur/vpnh.git
+```
+
+And run:
 
 ```
 sudo make install
