@@ -14,6 +14,8 @@ def die_with_usage(msg=nil, ecode=1)
 Usage: #{File.basename($0)} [command]
 
 help                       Display this message.
+
+setup                      Execute one-time setup.
 status                     Display status.
 connect <ovpn_name>        Connect to a known ovpn.
 disconnect                 Disconnect.
@@ -34,6 +36,8 @@ ovpns add <path>           Add a ovpn file.
 ovpns add <name> <path>    Add a ovpn file with name.
 ovpns add name=<name> auth=<auth> <path>
                            Add a ovpn file with name and auth.
+
+version                    Display version
 EOF
   exit ecode
 end
@@ -97,6 +101,8 @@ elsif command == 'status'
 elsif command == 'server_running?'
   puts master.server_running?.to_json
 elsif command =~ /^ovpn_(up|down)(.*)$/
+  # called by /usr/sbin/openvpn when an interface has come-up/gone-down
+  # we modify the ovpn config file such that this is called
   up_or_down = $1
   unless ['up', 'down'].member?(up_or_down)
     puts "ERROR. expecting up or down"

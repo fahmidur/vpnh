@@ -12,7 +12,9 @@ class VpnhConfig
       raise 'invalid conthing'
     end
     @props = Set.new([
-      'real_iface', 'vpnh_user', 'vpnh_tabl', 
+      'real_iface', 
+      'vpnh_user', 
+      'vpnh_tabl', 
       'autoconnect',
       'ovpn_sel',
     ])
@@ -94,7 +96,7 @@ class VpnhConfig
   end
 
   def autoconnect=(bool)
-    puts "autconnect=. bool=#{bool}(#{bool.class})"
+    puts "autconnect=#{bool}(#{bool.class})"
     @confile.set(:autoconnect, _fix_bool(bool))
   end
 
@@ -122,7 +124,7 @@ class VpnhConfig
   end
 
   def _fix_bool(bool)
-    puts "_fix_bool. bool=#{bool}(#{bool.class})"
+    #puts "_fix_bool. bool=#{bool}(#{bool.class})"
     return bool if bool == !!bool
     if bool.is_a?(String)
       return false if bool =~ /^\s*false\s*$/i

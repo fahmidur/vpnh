@@ -229,11 +229,13 @@ class VpnhMaster
   end
 
   # must succeed before ovpn_up
+  # IDEMPOTENT
   def setup
     unless Util.sys_write_ok?
       puts "sys_write denied"
       return false
     end
+
     errors = []
     vpnh_user = config.get(:vpnh_user)
     vpnh_tabl = config.get(:vpnh_tabl)
@@ -242,26 +244,33 @@ class VpnhMaster
     errors << 'expecting config.vpnh_tabl'  unless vpnh_tabl
     errors << 'expecting config.real_iface' unless real_iface
     return false if in_error?(errors)
-    # make vpnh_user
+
+    #--- { create vpnh_user { # IDEMPOTENT
     puts "VpnhMaster. setup. making user=#{vpnh_user}"
-    Util.user_add(vpnh_user) # idempotent
+    Util.user_add(vpnh_user)
     unless Util.user_exists?(vpnh_user)
       puts "ERROR: failed to make vpnh_user=#{vpnh_user}" 
       return false
     end
-    # make vpnh_table
+    #---
+
+    #--- { make vpnh_table { IDEMPOTENT
     puts "VpnhMaster. setup. making tabl=#{vpnh_tabl}"
     Util.routing_table_add(vpnh_tabl) #idempotent
     unless Util.routing_table_exists?(vpnh_tabl)
       puts "ERROR: failed to make vpnh_table=#{vpnh_tabl}"
       return false
     end
-    # block vpnh_user from using real_iface
+    #--- } make vpnh_table }
+    
+    #--- { block vpnh_user from using real_iface { IDEMPOTENT
     puts "VpnhMaster. setup. iptables block user=#{vpnh_user} from iface=#{real_iface}"
     unless Util.iptables_add("OUTPUT", "-o #{real_iface} -m owner --uid-owner #{vpnh_user} -j REJECT")
       puts "ERROR: iptables_add failed"
       return false
     end
+    #--- } block vpnh_user from using real_iface  }
+
     return true
   end
 
@@ -313,7 +322,7 @@ class VpnhMaster
     vpnh_tabl  = config.vpnh_tabl
     real_iface = config.real_iface
     #---
-    unless self.setup
+    unless self.setup() # idempotent
       puts "ERROR: setup failed"
       return false
     end

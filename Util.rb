@@ -43,7 +43,6 @@ module Util
     end
   end
 
-
   def self.package_install(name)
     puts "package_install. installing #{name} ..."
     if Util.which("apt-get")
@@ -63,6 +62,7 @@ module Util
     return Util.package_install(name)
   end
 
+  # IDEMPOTENT
   def self.shellrc_path_add(shellrc_path, path_item)
     unless File.exists?(shellrc_path)
       puts "shellrc_path_add. no such file at #{shellrc_path}"
@@ -137,28 +137,72 @@ module Util
     return true
   end
 
-  def self.iptables_has(chain, rule_spec)
+  def self.iptables4_has(chain, rule_spec)
     iptables_path = Util.which("iptables")
     unless iptables_path
-      puts "ERROR: unable to find iptables_path"
+      puts "ERROR: iptables4_has. unable to find iptables"
       return false
     end
     com = Command.new("#{iptables_path} -C #{chain} #{rule_spec}")
     return com.excode == 0
   end
 
-  def self.iptables_add(chain, rule_spec, idem=true)
-    iptables_path = Util.which("iptables")
+  def self.iptables6_has(chain, rule_spec)
+    iptables_path = Util.which("ip6tables")
     unless iptables_path
-      puts "ERROR: unable to find iptables_path"
+      puts "ERROR: iptables6_has. unable to find ip6tables"
       return false
     end
-    if idem && Util.iptables_has(chain, rule_spec)
-      puts "iptables. chain=#{chain} rule_spec=#{rule_spec} already exists. --- SKIPPED"
+    com = Command.new("#{iptables_path} -C #{chain} #{rule_spec}")
+    return com.excode == 0
+  end
+
+  def self.ipv6_sys_module_disable_val
+    return IO.read('/sys/module/ipv6/parameters/disable').to_i
+  end
+
+  def self.ipv6_enabled?
+    return ipv6_sys_module_disable_val == 0 && which("ip6tables")
+  end
+
+  def self.iptables4_add(chain, rule_spec, idem=true)
+    iptables_path = Util.which("iptables")
+    unless iptables_path
+      puts "ERROR: iptables4_add. unable to find iptables"
+      return false
+    end
+    if idem && Util.iptables4_has(chain, rule_spec)
+      puts "iptables4_add. chain=#{chain} rule_spec=#{rule_spec} already exists. --- SKIPPED"
       return true
     end
     com = Command.new("#{iptables_path} -A #{chain} #{rule_spec}")
     return com
+  end
+
+  def self.iptables6_add(chain, rule_spec, idem=true)
+    iptables_path = Util.which("ip6tables")
+    unless iptables_path
+      puts "ERROR: iptables6_add. unable to find ip6tables"
+      return false
+    end
+    if idem && Util.iptables6_has(chain, rule_spec)
+      puts "iptables6_add. chain=#{chain} rule_spec=#{rule_spec} already exists. --- SKIPPED"
+      return true
+    end
+    com = Command.new("#{iptables_path} -A #{chain} #{rule_spec}")
+    return com
+  end
+
+  def self.iptables_add(chain, rule_spec, idem=true)
+    ipv4_ok = iptables4_add(chain, rule_spec, idem)
+    return false unless ipv4_ok
+    ipv6_enabled = self.ipv6_enabled?
+    puts "iptables_add. ipv6_enabled=#{ipv6_enabled}"
+    if ipv6_enabled
+      ipv6_ok = iptables6_add(chain, rule_spec, idem)
+      return ipv6_ok
+    end
+    return true
   end
 
   def self.run(command)
