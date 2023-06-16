@@ -134,7 +134,7 @@ class VpnhMaster
     config.set(:autoconnect, true)
     config.set(:ovpn_sel, name)
     puts "openvpn. starting..."
-    com = Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
+    com = Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --verb 4 --daemon")
     puts "openvpn. start_ed... DONE"
     openvpn_prelock_release
     return com.success?
