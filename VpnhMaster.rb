@@ -84,7 +84,7 @@ class VpnhMaster
       out[:server_running] = server_running?(out[:server_pid])
       out[:server_ponging] = server_ponging?
     end
-    out[:connected] = (
+    out[:connected] = !!(
       out[:openvpn_running] && 
       out[:xip_virt] && 
       out[:xip_real] && 
