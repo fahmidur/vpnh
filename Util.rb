@@ -91,10 +91,10 @@ module Util
 
   def self.dir_ensure(path)
     if Dir.exists?(path)
-      puts "dir_ensure. dir already exists. path=#{path} "
+      # puts "dir_ensure. dir already exists. path=#{path} "
       return true
     end
-    puts "dir_ensure. making path=#{path}"
+    # puts "dir_ensure. making path=#{path}"
     FileUtils.mkdir_p(path)
     return true
   end
