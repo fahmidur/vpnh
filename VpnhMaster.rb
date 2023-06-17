@@ -47,11 +47,27 @@ class VpnhMaster
   def disconnect
     pid = openvpn_pid
     if pid && Util.process_exists?(pid)
-      puts "Sending SIGTERM to openvpn process at pid=#{pid}"
+      puts "Disconnect. Sending SIGTERM to openvpn process at pid=#{pid}"
       Process.kill(15, pid)
     end
     # config.set(:autoconnect, false)
     return true
+  end
+
+  def reconnect(name=nil)
+    count = 0
+    while (pid=openvpn_running?) && count <= 15
+      count += 1
+      puts "reconnect. Try #{count}. Found openvpn proc at pid=#{pid}. Calling disconnect."
+      disconnect()
+      sleep 2
+    end
+    pid = openvpn_running?
+    if pid
+      puts "reconnect. ERROR: Somehow openvpn is still running at pid=#{pid}"
+      return false
+    end
+    return connect(name)
   end
 
   def get_xip_real
@@ -100,12 +116,6 @@ class VpnhMaster
       config.get(:autoconnect) &&
       config.get(:ovpn_sel)
     )
-  end
-
-  def reconnect(name=nil)
-    disconnect
-    sleep 5
-    connect(name)
   end
 
   def connect(name=nil)
