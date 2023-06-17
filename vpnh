@@ -19,6 +19,7 @@ setup                      Execute one-time setup.
 status                     Display status.
 connect <ovpn_name>        Connect to a known ovpn.
 disconnect                 Disconnect.
+reconnect                  Disconnect then Connect.
 
 config                     Show current config file.
 config get <key>           Get a config value.
