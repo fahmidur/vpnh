@@ -80,6 +80,7 @@ class Ovpns
       if auth_path
         olines << "auth-user-pass #{auth_path}"
       end
+      olines << "log-append /var/log/vpnh_openvpn.log"
       olines << '#vpnh}'
       file_open_success = true
     end

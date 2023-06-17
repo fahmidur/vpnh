@@ -1,4 +1,5 @@
 class VpnhMaster
+  require 'time'
   require_relative 'Util'
   require_relative 'ConfigFile'
   require_relative 'VpnhConfig'
@@ -46,11 +47,27 @@ class VpnhMaster
   def disconnect
     pid = openvpn_pid
     if pid && Util.process_exists?(pid)
-      puts "killing openvpn at pid=#{pid}"
+      puts "Disconnect. Sending SIGTERM to openvpn process at pid=#{pid}"
       Process.kill(15, pid)
     end
-    config.set(:autoconnect, false)
+    # config.set(:autoconnect, false)
     return true
+  end
+
+  def reconnect(name=nil)
+    count = 0
+    while (pid=openvpn_running?) && count <= 15
+      count += 1
+      puts "reconnect. Try #{count}. Found openvpn proc at pid=#{pid}. Calling disconnect."
+      disconnect()
+      sleep 2
+    end
+    pid = openvpn_running?
+    if pid
+      puts "reconnect. ERROR: Somehow openvpn is still running at pid=#{pid}"
+      return false
+    end
+    return connect(name)
   end
 
   def get_xip_real
@@ -84,7 +101,7 @@ class VpnhMaster
       out[:server_running] = server_running?(out[:server_pid])
       out[:server_ponging] = server_ponging?
     end
-    out[:connected] = (
+    out[:connected] = !!(
       out[:openvpn_running] && 
       out[:xip_virt] && 
       out[:xip_real] && 
@@ -134,7 +151,7 @@ class VpnhMaster
     config.set(:autoconnect, true)
     config.set(:ovpn_sel, name)
     puts "openvpn. starting..."
-    com = Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --daemon")
+    com = Util.run("openvpn --config #{ovpn_path} --writepid #{openvpn_pid_path} --verb 4 --daemon")
     puts "openvpn. start_ed... DONE"
     openvpn_prelock_release
     return com.success?

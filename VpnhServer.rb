@@ -64,6 +64,7 @@ class VpnhServer
     FileUtils.rm_f(@master.ipc_path) if File.exists?(@master.ipc_path)
     DRb.start_service("drbunix://#{@master.ipc_path}", self)
     @t1 = Thread.new {
+      connect_fail_count = 0
       while(@mainloop_go)
         puts "========================================"
         self.config_update
@@ -74,9 +75,18 @@ class VpnhServer
         else 
           if @master.auto_connectable?
             puts "auto_connectable. connecting..."
-            @master.connect
+            ok = @master.connect
+            unless ok
+              connect_fail_count += 1
+              puts "auto_connectable. Connect FAILURE. connect_fail_count=#{connect_fail_count}"
+              if connect_fail_count > 3
+                puts "auto_connectable. Connect. Something is wrong, trying reconnect ..."
+                connect_fail_count = 0
+                @master.reconnect
+              end
+            end
           else
-            puts "NOT autoconnectable. -SKIP-"
+            puts "NOT auto_connectable. -SKIP-"
           end
         end
         sleep 15
