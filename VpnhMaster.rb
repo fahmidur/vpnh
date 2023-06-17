@@ -12,7 +12,6 @@ class VpnhMaster
   attr_reader :the_path
 
   def initialize
-    @status_prev = {}
   end
 
   def version
@@ -92,20 +91,6 @@ class VpnhMaster
       out[:xip_real] && 
       out[:xip_real] != out[:xip_virt]
     )
-    connected_curr = out[:connected]
-    connected_prev = !!(@status_prev[:connected])
-    if connected_curr != connected_prev 
-      if connected_curr 
-        # transitioned from disconnected -> connected 
-        # out[:connected_count] = (@status_prev[:connected_count] || 0)+1
-        out[:connected_at] = Time.now
-      else
-        # transitioned from connected -> disconnected
-        # out[:disconnected_count] = (@status_prev[:disconnected_count] || 0)+1
-        out[:disconnected_at] = Time.now
-      end
-    end
-    @status_prev = out
     return out
   end
 
