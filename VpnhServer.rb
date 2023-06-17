@@ -82,7 +82,7 @@ class VpnhServer
               if connect_fail_count > 3
                 puts "auto_connectable. Connect. Something is wrong, trying reconnect ..."
                 connect_fail_count = 0
-                master.reconnect
+                @master.reconnect
               end
             end
           else
