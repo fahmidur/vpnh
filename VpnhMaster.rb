@@ -1,4 +1,5 @@
 class VpnhMaster
+  require 'time'
   require_relative 'Util'
   require_relative 'ConfigFile'
   require_relative 'VpnhConfig'
@@ -11,6 +12,7 @@ class VpnhMaster
   attr_reader :the_path
 
   def initialize
+    @status_prev = {}
   end
 
   def version
@@ -46,10 +48,10 @@ class VpnhMaster
   def disconnect
     pid = openvpn_pid
     if pid && Util.process_exists?(pid)
-      puts "killing openvpn at pid=#{pid}"
+      puts "Sending SIGTERM to openvpn process at pid=#{pid}"
       Process.kill(15, pid)
     end
-    config.set(:autoconnect, false)
+    # config.set(:autoconnect, false)
     return true
   end
 
@@ -90,6 +92,20 @@ class VpnhMaster
       out[:xip_real] && 
       out[:xip_real] != out[:xip_virt]
     )
+    connected_curr = out[:connected]
+    connected_prev = !!(@status_prev[:connected])
+    if connected_curr != connected_prev 
+      if connected_curr 
+        # transitioned from disconnected -> connected 
+        # out[:connected_count] = (@status_prev[:connected_count] || 0)+1
+        out[:connected_at] = Time.now
+      else
+        # transitioned from connected -> disconnected
+        # out[:disconnected_count] = (@status_prev[:disconnected_count] || 0)+1
+        out[:disconnected_at] = Time.now
+      end
+    end
+    @status_prev = out
     return out
   end
 
@@ -99,6 +115,12 @@ class VpnhMaster
       config.get(:autoconnect) &&
       config.get(:ovpn_sel)
     )
+  end
+
+  def reconnect(name=nil)
+    disconnect
+    sleep 5
+    connect(name)
   end
 
   def connect(name=nil)
