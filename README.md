@@ -213,7 +213,7 @@ sysctl -w net.ipv6.conf.all.disable_ipv6=1
 ## Recommended VPN Providers
 
 There are many good VPN providers. 
-I have tried the following popular offerrings:
+I have tried the following popular offerings:
 
 * NordVPN -- Plenty of servers but no Port Forwarding option.
 * ExpressVPN -- Pretty fast and reliable but no Port Forwarding option.
@@ -229,14 +229,14 @@ With Port Forwarding you can host a server, host a LAN party, and many other thi
 
 ## Debugging
 
-The install script installed a systemd service named `vpnh`.
+The install script installs a Systemd service named `vpnh`.
 
-Get daemon status:
+To get daemon status, run:
 ```
 systemctl status vpnh
 ```
 
-Watch the logs:
+To watch the logs, run:
 ```
 journalctl -fu vpnh
 ```
