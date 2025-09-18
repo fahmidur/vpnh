@@ -1,4 +1,16 @@
-# vpnh - A VPN Helper
+# VPNH - A VPN Split-Tunnel Helper
+
+```plaintext
+                      ___________
+                     / ________>>
+_____   ______  ____ | |__
+>>__ \ /    _ \|  _ \|  _ \
+    \ V /| |_)   | |   | | |
+     \_/ |  __/|_| |_|_| | |_____
+         |_|             \_____>>
+   
+
+```
 
 This is a daemon to help you do VPN [**split-tunneling**](https://en.wikipedia.org/wiki/Split_tunneling) on Linux/Ubuntu. 
 It is primarily a wrapper around the OpenVPN client.
@@ -9,7 +21,7 @@ Upon connection vpnh will create a user named `vpnh_user` and set up all of the 
 to ensure that only that user is under the VPN.
 Once connected vpnh will ensure that you remain connected.
 
-The name of vpnh_user and other settings are configurable via the `vpnh config ...` set of commands.
+The name of `vpnh_user` and other settings are configurable via the `vpnh config ...` set of commands.
 
 The vpnh user is intentionally created such that when the VPN is disconnected/down the user has no access to the real interface.
 This is to prevent any accidental leaks from programs you may be running under the vpnh user.
@@ -229,9 +241,9 @@ With Port Forwarding you can host a server, host a LAN party, and many other thi
 
 ## Debugging
 
-The install script installs a Systemd service named `vpnh`.
+The installation script creates a Systemd service named `vpnh`.
 
-To get daemon status, run:
+To view daemon status, run:
 ```
 systemctl status vpnh
 ```
