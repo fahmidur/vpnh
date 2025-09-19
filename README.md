@@ -12,19 +12,24 @@ _____   ______  ____ | |__
 
 ```
 
-This is a daemon to help you do VPN [**split-tunneling**](https://en.wikipedia.org/wiki/Split_tunneling) on Linux/Ubuntu. 
-It is primarily a wrapper around the OpenVPN client.
+VPNH is a daemon to help you do VPN [**split-tunneling**](https://en.wikipedia.org/wiki/Split_tunneling) on Linux/Ubuntu. 
+It uses the OpenVPN client, sets up routing rules, and keeps the connection alive.
 
-With vpnh you can add a number of OpenVPN config files and connect to any of them. 
-The config file will be modifed to ensure that it does not put your entire machine under the vpn. 
-Upon connection vpnh will create a user named `vpnh_user` and set up all of the routing rules
+With VPNH you can add a number of OpenVPN config files and connect to any one of them. 
+The config file will be modifed to ensure that it does not put your entire machine under the VPN. 
+Upon connection VPNH will create a user named `vpnh_user` and set up all of the routing rules
 to ensure that only that user is under the VPN.
-Once connected vpnh will ensure that you remain connected.
+Once connected VPNH will ensure that you remain connected.
 
 The name of `vpnh_user` and other settings are configurable via the `vpnh config ...` set of commands.
 
-The vpnh user is intentionally created such that when the VPN is disconnected/down the user has no access to the real interface.
+The `vpnh_user` is intentionally created such that when the VPN is disconnected/down, this user has no access to the real interface, 
+and therefore no access to the internet.
 This is to prevent any accidental leaks from programs you may be running under the vpnh user.
+
+The idea is that you're running some program that should never access the
+internet outside of the protection of the VPN.
+That is what VPNH tries to ensure.
 
 **WARNING**: This project is a work in progress, while it does work,
 the documentation is incomplete, the commands are subject to change, tests need to be written, and much more. Please use at your own discretion.
@@ -49,6 +54,8 @@ And run:
 ```
 sudo make install
 ```
+
+This will install VPNH to `/opt/vpnh`, create the daemon, and setup the routing rules.
 
 ## What is split-tunneling?
 
